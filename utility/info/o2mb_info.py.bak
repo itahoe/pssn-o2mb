@@ -79,10 +79,9 @@ def main():
             ppm         = (m[33] << 16) + (m[32] & 0xFFFF)
             raw         = m[34]
             instability = m[35]
-
-            brd_temp    = m[42]
-            mcu_temp    = m[44]
-            mcu_vdda    = m[45]
+            brd_temp    = m[36]
+            mcu_temp    = m[40]
+            mcu_vdda    = m[41]
 
             if( int(ppm) & 0x80000000):
                 ppm = -0x100000000 + int(ppm)

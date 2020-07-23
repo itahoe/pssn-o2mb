@@ -1,3 +1,5 @@
+#https://stackoverflow.com/questions/12090503/listing-available-com-ports-with-python/14224477#14224477
+
 import sys
 import glob
 import serial
