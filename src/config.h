@@ -1,6 +1,6 @@
 /**
   * @file    config.h
-  * @brief   Config
+  * @brief   Master config file
   * @author  Igor T. <research.tahoe@gmail.com>
   */
 

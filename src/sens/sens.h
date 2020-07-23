@@ -94,6 +94,10 @@ void
 sens_oxgn_init(                         const   size_t          samplerate_sps );
 
 
+int32_t
+sens_oxgn_read( void );
+
+
 void
 sens_oxgn_run(                          const   uint16_t *      data,
                                         const   size_t          len );

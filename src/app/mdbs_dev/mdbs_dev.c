@@ -194,11 +194,11 @@ mdbs_hreg_read(                         const   size_t                  idx,
                         *data   = 0;
                         break;
 
-                case MDBS_HREG_SENS_PPM_HI:
+                case MDBS_HREG_SENS_R0_PPM_HI:
                         *data   = sens.oxgn.ppm.u16[ 0];
                         break;
 
-                case MDBS_HREG_SENS_PPM_LO:
+                case MDBS_HREG_SENS_R0_PPM_LO:
                         *data   = sens.oxgn.ppm.u16[ 1];
                         break;
 
@@ -210,17 +210,24 @@ mdbs_hreg_read(                         const   size_t                  idx,
                         *data   = sens.oxgn.instability;
                         break;
 
+                case MDBS_HREG_RESERVED_24:
+                case MDBS_HREG_RESERVED_25:
+                case MDBS_HREG_RESERVED_26:
+                case MDBS_HREG_RESERVED_27:
+                        *data   = 0;
+                        break;
+
+                case MDBS_HREG_RESERVED_28:
+                case MDBS_HREG_RESERVED_29:
+                        *data   = 0;
+                        break;
+
                 case MDBS_HREG_TEMP_BRD_CELS:
                         *data   = sens.lm75.celsius;
                         break;
 
                 case MDBS_HREG_SENS_OFST_RAW:
                         *data   = sens_oxgn_ofst_get();
-                        break;
-
-                case MDBS_HREG_RESERVED_26:
-                case MDBS_HREG_RESERVED_27:
-                        *data   = 0;
                         break;
 
                 case MDBS_HREG_MCU_TEMP_CELS:
@@ -231,12 +238,8 @@ mdbs_hreg_read(                         const   size_t                  idx,
                         *data   = sens.mcu.vref_mV;
                         break;
 
-                case MDBS_HREG_RESERVED_2A:
-                case MDBS_HREG_RESERVED_2B:
-                case MDBS_HREG_ERR_CODE_LAST:
-                case MDBS_HREG_RESERVED_2D:
                 case MDBS_HREG_RESERVED_2E:
-                case MDBS_HREG_RESERVED_2F:
+                case MDBS_HREG_ERR_CODE_LAST:
                         *data   = 0;
                         break;
 
@@ -353,10 +356,19 @@ mdbs_hreg_write(                        const   size_t                  idx,
                 case MDBS_HREG_RESERVED_1F:
 
 
-                case MDBS_HREG_SENS_PPM_LO:
-                case MDBS_HREG_SENS_PPM_HI:
+                case MDBS_HREG_SENS_R0_PPM_LO:
+                case MDBS_HREG_SENS_R0_PPM_HI:
                 case MDBS_HREG_SENS_RAW:
                 case MDBS_HREG_SENS_INSTABILITY:
+                        //address exist, read-only register, do nothing
+                        break;
+
+                case MDBS_HREG_RESERVED_24:
+                case MDBS_HREG_RESERVED_25:
+                case MDBS_HREG_RESERVED_26:
+                case MDBS_HREG_RESERVED_27:
+                case MDBS_HREG_RESERVED_28:
+                case MDBS_HREG_RESERVED_29:
                 case MDBS_HREG_TEMP_BRD_CELS:
                         //address exist, read-only register, do nothing
                         break;
@@ -367,16 +379,10 @@ mdbs_hreg_write(                        const   size_t                  idx,
                         sys_nvm_write16( SYS_NVM_ADDR_SENS_OFST_RAW, &sens.oxgn.offset, 1 );
                         break;
 
-                case MDBS_HREG_RESERVED_26:
-                case MDBS_HREG_RESERVED_27:
                 case MDBS_HREG_MCU_TEMP_CELS:
                 case MDBS_HREG_MCU_VDDA_mV:
-                case MDBS_HREG_RESERVED_2A:
-                case MDBS_HREG_RESERVED_2B:
-                case MDBS_HREG_ERR_CODE_LAST:
-                case MDBS_HREG_RESERVED_2D:
                 case MDBS_HREG_RESERVED_2E:
-                case MDBS_HREG_RESERVED_2F:
+                case MDBS_HREG_ERR_CODE_LAST:
                         //address exist, read-only register, do nothing
                         break;
 

@@ -56,6 +56,18 @@ sens_oxgn_init(                         const   size_t          samplerate_sps )
   * @param  None
   * @retval None
   */
+int32_t
+sens_oxgn_read( void )
+{
+        return( bsp_oxgn_read() );
+}
+
+
+/**
+  * @brief  
+  * @param  None
+  * @retval None
+  */
 void
 sens_oxgn_run(                          const   uint16_t *      data,
                                         const   size_t          len )
@@ -166,55 +178,3 @@ sens_oxgn_avrg_to_ppm(                  const   sens_trim_t *           p,
 
         return( (int32_t) ((ppm / k) + 0.5) );
 }
-
-
-/*******************************************************************************
-* OXGN OFST
-*******************************************************************************/
-/**
-  * @brief  
-  * @param  None
-  * @retval None
-  */
-void
-sens_oxgn_ofst_init(                    const   size_t          samplerate_sps )
-{
-        bsp_oxgn_ofst_init( samplerate_sps );
-}
-
-
-/**
-  * @brief  
-  * @param  None
-  * @retval None
-  */
-void
-sens_oxgn_ofst_run( void )
-{
-        bsp_oxgn_ofst_run();
-}
-
-
-/**
-  * @brief  
-  * @param  None
-  * @retval None
-  */
-void
-sens_oxgn_ofst_set(                     const   uint16_t        raw16 )
-{
-        bsp_oxgn_ofst_set( raw16 );
-}
-
-
-/**
-  * @brief  
-  * @param  None
-  * @retval None
-  */
-uint16_t
-sens_oxgn_ofst_get( void )
-{
-        return( bsp_oxgn_ofst_get() );
-}
-

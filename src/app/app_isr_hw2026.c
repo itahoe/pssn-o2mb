@@ -1,5 +1,5 @@
 /**
-  * @file    app_isr_hw2008.c
+  * @file    app_isr_hw2026.c
   * @brief   Interrupt Service Routines
   * @author  Igor T. <research.tahoe@gmail.com>
   */
@@ -172,6 +172,14 @@ DMA1_Channel4_5_IRQHandler(void)
 /*******************************************************************************
 * OXGN
 *******************************************************************************/
+void
+TIM3_IRQHandler( void )
+{
+        bsp_oxgn_timebase_isr();
+        app_sens_hook();
+}
+
+
 /**
   * @brief  DMA1 channel 4 and 5 interrupts handling
   * @param  None
@@ -191,5 +199,5 @@ ADC1_IRQHandler( void )
   */
 void DMA1_Channel1_IRQHandler(void)
 {
-        bsp_oxgn_dma_isr();
+        bsp_oxgn_adc_dma_isr();
 }

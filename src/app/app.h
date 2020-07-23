@@ -25,8 +25,9 @@ typedef union
 typedef struct  app_evt_s
 {
         bool                    ser1_recv;
-        bool                    adc;
         bool                    lm75;
+        bool                    adc;
+        bool                    sens;
 } app_evt_t;
 
 
@@ -47,10 +48,8 @@ app_1msec_tick_hook( void );
 void
 app_ser1_recv_hook( void );
 
-
-
-void Error_Handler(void);
-
+void
+app_sens_hook( void );
 
 
 #endif //APP_H

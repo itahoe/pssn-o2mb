@@ -15,7 +15,8 @@
 #include "app.h"
 
 
-#define OXGN_RAW_SIZEOF                 3
+//#define OXGN_RAW_SIZEOF                 3
+#define OXGN_RAW_SIZEOF                 2
 //#define SENS_O2_AVERAGE_BUF_SIZEOF      8
 #define SENS_O2_AVERAGE_BUF_SIZEOF      64
 
@@ -24,6 +25,7 @@ static  uint8_t         modbus_adu[ MDBS_RTU_ADU_SIZEOF ];
 static  uint16_t        adc_raw[ OXGN_RAW_SIZEOF ];
 static  int32_t         avrg_buf[ SENS_O2_AVERAGE_BUF_SIZEOF ];
         app_t           app;
+
         sens_t          sens    =
 {
         .avrg.buf               = avrg_buf,
@@ -88,28 +90,27 @@ app_1msec_tick_hook( void )
 }
 
 
+/**
+  * @brief  
+  * @param  None
+  * @retval None
+  */
 void
-HAL_ADC_ConvCpltCallback(                       ADC_HandleTypeDef *     hadc )
+app_sens_hook( void )
 {
-        app.evt.adc     = true;
+        app.evt.sens    =   true;
 }
 
 
 /**
-  * @brief  The application entry point.
-  * @retval int
+  * @brief  
+  * @param  None
+  * @retval None
   */
-int main( void )
+static
+void
+app_nvm_restore()
 {
-        size_t          len;
-
-
-        HAL_Init();
-
-        sys_clock_config();
-
-        sys_nvm_init();
-
         sys_nvm_read16( SYS_NVM_ADDR_STARTS_COUNT,              &sens.mcu.starts_cnt,                   1 );
         sens.mcu.starts_cnt++;
         sys_nvm_write16( SYS_NVM_ADDR_STARTS_COUNT,             &sens.mcu.starts_cnt,                   1 );
@@ -128,23 +129,55 @@ int main( void )
         sys_nvm_read16( SYS_NVM_ADDR_SENS_TRIM_1_RAW_LO,        &sens.trim.raw[ 1].u16[ 0],             1 );
         sys_nvm_read16( SYS_NVM_ADDR_SENS_TRIM_1_TIMESTMP_HI,   &sens.trim.timestamp[ 1].u16[ 1],       1 );
         sys_nvm_read16( SYS_NVM_ADDR_SENS_TRIM_1_TIMESTMP_LO,   &sens.trim.timestamp[ 1].u16[ 0],       1 );
+}
+
+
+/**
+  * @brief  
+  * @param  None
+  * @retval None
+  */
+void
+HAL_ADC_ConvCpltCallback(                       ADC_HandleTypeDef *     hadc )
+{
+        app.evt.adc     = true;
+}
+
+
+/**
+  * @brief  The application entry point.
+  * @retval int
+  */
+int main( void )
+{
+        size_t          len;
+        int32_t         sens_raw;
+
+
+        HAL_Init();
+
+        sys_clock_config();
+
+        sys_nvm_init();
+        app_nvm_restore();
 
         sens_trim_restore( &sens.trim );
 
-        sys_ser1_init( CFG_MDBS_BAUDRATE );
-        sys_ser1_recv( modbus_adu, MDBS_RTU_ADU_SIZEOF );
-
-        sens_oxgn_init( CFG_SENS_OXGN_SMPLRATE_SPS );
-        sens_oxgn_run( adc_raw, OXGN_RAW_SIZEOF );
-
-        sens_oxgn_ofst_init( 1 );
-        sens_oxgn_ofst_run();
-        sens_oxgn_ofst_set( sens.oxgn.offset );
+        //sens_oxgn_ofst_init( 1 );
+        //sens_oxgn_ofst_run();
+        //sens_oxgn_ofst_set( sens.oxgn.offset );
 
         lm75_init();
 
         ui_led_sts_init();
         ui_led_sts_set( true );
+
+        sens_oxgn_init( CFG_SENS_OXGN_SMPLRATE_SPS );
+        //sens_oxgn_init( 1 );
+        sens_oxgn_run( adc_raw, OXGN_RAW_SIZEOF );
+
+        sys_ser1_init( CFG_MDBS_BAUDRATE );
+        sys_ser1_recv( modbus_adu, MDBS_RTU_ADU_SIZEOF );
 
 
         while( true )
@@ -174,15 +207,19 @@ int main( void )
                 if( app.evt.adc )
                 {
                         app.evt.adc             = false;
+                        sens.mcu.vref_mV        = sens_mcu_raw_to_vref_mV( adc_raw[ 1] );
+                        sens.mcu.celsius        = sens_mcu_raw_to_celsius( adc_raw[ 0], sens.mcu.vref_mV );
+                } //adc
 
-                        sens.oxgn.avrg          = sens_oxgn_raw_avrg( &sens.avrg, adc_raw[ 0] );
-                        //sens.oxgn.ppm.i32       = sens_oxgn_raw_to_ppm(  &sens.trim, sens.oxgn.avrg, sens.lm75.celsius );
+                if( app.evt.sens )
+                {
+                        app.evt.sens            =   false;
+
+                        //sens_raw                = sens_oxgn_read() >> 8;
+                        sens_raw                = sens_oxgn_read();
+                        sens.oxgn.avrg          = sens_oxgn_raw_avrg( &sens.avrg, sens_raw );
                         sens.oxgn.ppm.i32       = sens_oxgn_avrg_to_ppm(  &sens.trim, sens.avrg.sum, sens.avrg.buf_sizeof, sens.lm75.celsius );
                         sens.oxgn.instability   = sens_oxgn_get_instability( &sens.avrg, sens.oxgn.avrg );
-                        sens.mcu.vref_mV        = sens_mcu_raw_to_vref_mV( adc_raw[ 2] );
-                        sens.mcu.celsius        = sens_mcu_raw_to_celsius( adc_raw[ 1], sens.mcu.vref_mV );
-
-                        //APP_TRACE( "%d\n", adc_raw[ 0] );
-                } //adc
+                } //app.evt.sens
         }
 }

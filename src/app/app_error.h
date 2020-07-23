@@ -4,6 +4,7 @@
   * @author  Igor T. <research.tahoe@gmail.com>
   */
 
+
 #ifndef APP_ERROR_H
 #define APP_ERROR_H
 

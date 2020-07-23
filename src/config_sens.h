@@ -9,7 +9,6 @@
 #define  CFG_SENS_H
 
 
-//#define CFG_SENS_OXGN_SMPLRATE_SPS              2
 #define CFG_SENS_OXGN_SMPLRATE_SPS              16
 #define CFG_SENS_TRIM_NUM_POINTS                2
 
