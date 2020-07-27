@@ -51,6 +51,9 @@ app_ser1_recv_hook( void );
 void
 app_sens_hook( void );
 
+void
+app_adc_eos_hook( void );
+
 
 #endif //APP_H
 

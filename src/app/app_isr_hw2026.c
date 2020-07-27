@@ -188,7 +188,13 @@ TIM3_IRQHandler( void )
 void
 ADC1_IRQHandler( void )
 {
-        bsp_oxgn_adc_isr();
+        bool    end_of_seq      = bsp_oxgn_adc_isr();
+
+        if( end_of_seq )
+        {
+                app_adc_eos_hook();
+        }
+
 }
 
 

@@ -1,176 +1,204 @@
-/***************************************************************************//**
- *   @file   AD7799.h
- *   @brief  Header file of AD7799 Driver.
- *   @author Bancisor Mihai
-********************************************************************************
- * Copyright 2012(c) Analog Devices, Inc.
- *
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *  - Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- *  - Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- *  - Neither the name of Analog Devices, Inc. nor the names of its
- *    contributors may be used to endorse or promote products derived
- *    from this software without specific prior written permission.
- *  - The use of this software may or may not infringe the patent rights
- *    of one or more patent holders.  This license does not release you
- *    from the requirement that you obtain separate licenses from these
- *    patent holders to use this software.
- *  - Use of the software either in source or binary form, must be run
- *    on or directly connected to an Analog Devices Inc. component.
- *
- * THIS SOFTWARE IS PROVIDED BY ANALOG DEVICES "AS IS" AND ANY EXPRESS OR
- * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, NON-INFRINGEMENT,
- * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
- * IN NO EVENT SHALL ANALOG DEVICES BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
- * LIMITED TO, INTELLECTUAL PROPERTY RIGHTS, PROCUREMENT OF SUBSTITUTE GOODS OR
- * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
- * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
- * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
-********************************************************************************
- *   SVN Revision: 577
-*******************************************************************************/
-#ifndef __AD7799_H__
-#define __AD7799_H__
+/**
+  * @file    ad7799.h
+  * @brief   AD7799 driver header
+  * @author  Igor T. <research.tahoe@gmail.com>
+  */
+
+
+#ifndef AD7799_H
+#define AD7799_H
 
 
 #include <stdint.h>
+#include <stdbool.h>
 
 
-/******************************************************************************/
-/* AD7799                                                                   */
-/******************************************************************************/
-
-/*AD7799 Registers*/
-#define AD7799_REG_COMM                 0                       /* Communications Register(WO, 8-bit) */
-#define AD7799_REG_STAT                 0                       /* Status Register	    (RO, 8-bit) */
-#define AD7799_REG_MODE                 1                       /* Mode Register	     	(RW, 16-bit */
-#define AD7799_REG_CONF                 2                       /* Configuration Register (RW, 16-bit)*/
-#define AD7799_REG_DATA                 3                       /* Data Register	     	(RO, 16-/24-bit) */
-#define AD7799_REG_ID                   4                       /* ID Register	     	(RO, 8-bit) */
-#define AD7799_REG_IO                   5                       /* IO Register	     	(RO, 8-bit) */
-#define AD7799_REG_OFFSET               6                       /* Offset Register	    (RW, 24-bit */
-#define AD7799_REG_FULLSALE             7                       /* Full-Scale Register	(RW, 24-bit */
-
-/* Communications Register Bit Designations (AD7799_REG_COMM) */
-#define AD7799_COMM_WEN                 (1 << 7)                /* Write Enable */
-#define AD7799_COMM_WRITE               (0 << 6)                /* Write Operation */
-#define AD7799_COMM_READ                (1 << 6)                /* Read Operation */
-#define AD7799_COMM_ADDR(x)             (((x) & 0x7) << 3)      /* Register Address */
-#define AD7799_COMM_CREAD               (1 << 2)                /* Continuous Read of Data Register */
-
-/* Status Register Bit Designations (AD7799_REG_STAT) */
-#define AD7799_STAT_RDY                 (1 << 7)                /* Ready */
-#define AD7799_STAT_ERR                 (1 << 6)                /* Error (Overrange, Underrange) */
-#define AD7799_STAT_CH3                 (1 << 2)                /* Channel 3 */
-#define AD7799_STAT_CH2                 (1 << 1)                /* Channel 2 */
-#define AD7799_STAT_CH1                 (1 << 0)                /* Channel 1 */
-
-/* Mode Register Bit Designations (AD7799_REG_MODE) */
-#define AD7799_MODE_SEL(x)              (((x) & 0x7) << 13)     /* Operation Mode Select */
-#define AD7799_MODE_PSW(x)              (1 << 12)               /* Power Switch Control Bit */	
-#define AD7799_MODE_RATE(x)             ((x) & 0xF)             /* Filter Update Rate Select */
-
-/* AD7799_MODE_SEL(x) options */
-#define AD7799_MODE_CONT                0 /* Continuous Conversion Mode */
-#define AD7799_MODE_SINGLE              1 /* Single Conversion Mode */
-#define AD7799_MODE_IDLE                2 /* Idle Mode */
-#define AD7799_MODE_PWRDN               3 /* Power-Down Mode */
-#define AD7799_MODE_CAL_INT_ZERO        4 /* Internal Zero-Scale Calibration */
-#define AD7799_MODE_CAL_INT_FULL        5 /* Internal Full-Scale Calibration */
-#define AD7799_MODE_CAL_SYS_ZERO        6 /* System Zero-Scale Calibration */
-#define AD7799_MODE_CAL_SYS_FULL        7 /* System Full-Scale Calibration */
-
-/* Configuration Register Bit Designations (AD7799_REG_CONF) */
-#define AD7799_CONF_BO_EN               (1 << 13) 		/* Burnout Current Enable */
-#define AD7799_CONF_UNIPOLAR            (1 << 12) 		/* Unipolar/Bipolar Enable */
-#define AD7799_CONF_GAIN(x)             (((x) & 0x7) << 8)      /* Gain Select */
-#define AD7799_CONF_REFDET(x)           (((x) & 0x1) << 5) 	/* Reference detect function */
-#define AD7799_CONF_BUF                 (1 << 4) 		/* Buffered Mode Enable */
-#define AD7799_CONF_CHAN(x)             ((x) & 0x7) 		/* Channel select */
-
-/* AD7799_CONF_GAIN(x) options */
-#define AD7799_GAIN_1                   0
-#define AD7799_GAIN_2                   1
-#define AD7799_GAIN_4                   2
-#define AD7799_GAIN_8                   3
-#define AD7799_GAIN_16                  4
-#define AD7799_GAIN_32                  5
-#define AD7799_GAIN_64                  6
-#define AD7799_GAIN_128                 7
-
-/* AD7799_CONF_REFDET(x) options */
-#define AD7799_REFDET_ENA               1
-#define AD7799_REFDET_DIS               0
-
-/* AD7799_CONF_CHAN(x) options */
-#define AD7799_CH_AIN1P_AIN1M           0 /* AIN1(+) - AIN1(-) */
-#define AD7799_CH_AIN2P_AIN2M           1 /* AIN2(+) - AIN2(-) */
-#define AD7799_CH_AIN3P_AIN3M           2 /* AIN3(+) - AIN3(-) */
-#define AD7799_CH_AIN1M_AIN1M           3 /* AIN1(-) - AIN1(-) */
-#define AD7799_CH_AVDD_MONITOR          7 /* AVDD Monitor */
-
-/* ID Register Bit Designations (AD7799_REG_ID) */
-#define AD7799_ID                       0x9
-#define AD7799_ID_MASK                  0xF
-
-/* IO (Excitation Current Sources) Register Bit Designations (AD7799_REG_IO) */
-#define AD7799_IOEN                     (1 << 6)
-#define AD7799_IO1(x)                   (((x) & 0x1) << 4)
-#define AD7799_IO2(x)                   (((x) & 0x1) << 5)
+#define AD7799_COMM_WEN                 (1 << 7)
+#define AD7799_COMM_WRITE               (0 << 6)
+#define AD7799_COMM_READ                (1 << 6)
+#define AD7799_COMM_CREAD               (1 << 2)
+#define AD7799_STS_READY                (1 << 7)
+#define AD7799_STS_ERROR                (1 << 6)
+#define AD7799_STS_NOREF                (1 << 5)
+#define AD7799_STS_CH3                  (1 << 2)
+#define AD7799_STS_CH2                  (1 << 1)
+#define AD7799_STS_CH1                  (1 << 0)
+#define AD7799_ID                       0x09
+#define AD7799_ID_MASK                  0x0F
 
 
-/******************************************************************************/
-/* Functions Prototypes                                                       */
-/******************************************************************************/
+typedef enum    ad7799_reg_e
+{
+        AD7799_REG_COMM                 = 0,    //WO, 8-bit
+        AD7799_REG_STS                  = 0,    //RO, 8-bit
+        AD7799_REG_MODE                 = 1,    //RW, 16-bit
+        AD7799_REG_CONF                 = 2,    //RW, 16-bit
+        AD7799_REG_DATA                 = 3,    //RO, 24-bit
+        AD7799_REG_ID                   = 4,    //RO, 8-bit
+        AD7799_REG_IO                   = 5,    //RO, 8-bit
+        AD7799_REG_OFFSET               = 6,    //RW, 24-bit
+        AD7799_REG_FULLSALE             = 7,    //RW, 24-bit
+} ad7799_reg_t;
 
-/* Initialize AD7799 and check if the device is present*/
+
+typedef enum    ad7799_mode_e
+{
+        AD7799_MODE_CONTINUOUS          = 0,
+        AD7799_MODE_SINGLE              = 1,
+        AD7799_MODE_IDLE                = 2,
+        AD7799_MODE_POWERDOWN           = 3,
+        AD7799_MODE_CAL_INT_ZERO        = 4,
+        AD7799_MODE_CAL_INT_FULL        = 5,
+        AD7799_MODE_CAL_SYS_ZERO        = 6,
+        AD7799_MODE_CAL_SYS_FULL        = 7,
+} ad7799_mode_t;
+
+typedef enum    ad7799_rate_e
+{
+        AD7799_RATE_RESERVED            =  0,
+        AD7799_RATE_470_Hz              =  1,
+        AD7799_RATE_242_Hz              =  2,
+        AD7799_RATE_123_Hz              =  3,
+        AD7799_RATE_62_Hz               =  4,
+        AD7799_RATE_50_Hz               =  5,
+        AD7799_RATE_39_Hz               =  6,
+        AD7799_RATE_33_2_Hz             =  7,
+        AD7799_RATE_19_6_Hz             =  8,
+        AD7799_RATE_16_7_Hz_REJ_50_Hz   =  9,
+        AD7799_RATE_16_7_Hz             = 10,
+        AD7799_RATE_12_5_Hz             = 11,
+        AD7799_RATE_10_Hz               = 12,
+        AD7799_RATE_8_33_Hz             = 13,
+        AD7799_RATE_6_25_Hz             = 14,
+        AD7799_RATE_4_17_Hz             = 15,
+} ad7799_rate_t;
+
+typedef enum    ad7799_gain_e
+{
+        AD7799_GAIN_1                   = 0,
+        AD7799_GAIN_2                   = 1,
+        AD7799_GAIN_4                   = 2,
+        AD7799_GAIN_8                   = 3,
+        AD7799_GAIN_16                  = 4,
+        AD7799_GAIN_32                  = 5,
+        AD7799_GAIN_64                  = 6,
+        AD7799_GAIN_128                 = 7,
+} ad7799_gain_t;
+
+typedef enum    ad7799_chnl_e
+{
+        AD7799_CHNL_AIN1P_AIN1M         = 0, //AIN1(+) - AIN1(-)
+        AD7799_CHNL_AIN2P_AIN2M         = 1, //AIN2(+) - AIN2(-)
+        AD7799_CHNL_AIN3P_AIN3M         = 2, //AIN3(+) - AIN3(-)
+        AD7799_CHNL_AIN1M_AIN1M         = 3, //AIN1(-) - AIN1(-)
+        AD7799_CHNL_AVDD_MONITOR        = 7, //AVDD Monitor
+} ad7799_chnl_t;
+
+
+/*******************************************************************************
+* REG COMMUNICATION
+*******************************************************************************/
+
+/*******************************************************************************
+* REG STATUS
+*******************************************************************************/
+bool
+ad7799_sts_ready( void );
+
+bool
+ad7799_sts_error( void );
+
+bool
+ad7799_sts_noref( void );
+
+/*******************************************************************************
+* REG MODE
+*******************************************************************************/
+void
+ad7799_set_mode(                        const   ad7799_mode_t   mode );
+
+void
+ad7799_set_pwr_swtch(                   const   bool            psw );
+
+void
+ad7799_set_rate(                        const   ad7799_rate_t   rate );
+
+
+/*******************************************************************************
+* REG CONFIGURATION
+*******************************************************************************/
+void
+ad7799_set_burnout(                     const   bool            burnout );
+
+void
+ad7799_set_unipolar(                    const   bool            unipolar );
+
+void
+ad7799_set_gain(                        const   ad7799_gain_t   gain );
+
+void
+ad7799_set_refdet(                      const   bool            refdet );
+
+void
+ad7799_set_buffered(                    const   bool            buf );
+
+void
+ad7799_set_channel(                     const   ad7799_chnl_t   chnl );
+
+/*******************************************************************************
+* REG DATA
+*******************************************************************************/
+uint32_t
+ad7799_get_data( void );
+
+/*******************************************************************************
+* REG ID
+*******************************************************************************/
 uint8_t
+ad7799_get_id( void );
+
+/*******************************************************************************
+* REG IO
+*******************************************************************************/
+uint8_t
+ad7799_get_io( void );
+
+void
+ad7799_set_io(                          const   uint8_t         data );
+
+/*******************************************************************************
+* REG OFFSET
+*******************************************************************************/
+uint32_t
+ad7799_get_offset( void );
+
+void
+ad7799_set_offset(                      const   uint32_t        data );
+
+/*******************************************************************************
+* REG FULL-SCALE
+*******************************************************************************/
+uint32_t
+ad7799_get_fullscale( void );
+
+void
+ad7799_set_fullscale(                   const   uint32_t        data );
+
+/*******************************************************************************
+* REG
+*******************************************************************************/
+bool
 ad7799_init( void );
 
-/* Sends 32 consecutive 1's on SPI in order to reset the part. */
 void
 ad7799_reset( void );
 
-/* Reads the value of the selected register. */
-uint32_t
-ad7799_reg_read(                const   uint8_t         addr,
-                                        const   uint8_t         size );
-
-/* Writes a value to the register. */
-void
-ad7799_reg_write(                const   uint8_t         addr,
-					const   uint32_t        data,
-					const   uint8_t         size );
-
-/* Reads /RDY bit of Status register. */
-uint8_t
-ad7799_Ready( void );
-
-/* Sets the operating mode of AD7799. */
-void
-ad7799_SetMode(                         const   uint32_t        mode );
-
-/* Selects the channel of AD7799. */
-void
-ad7799_SetChannel(                      const   uint32_t        chnl );
-
-/* Sets the gain of the In-Amp. */
-void
-ad7799_SetGain(                         const   uint32_t        gain );
-
-/* Enables or disables the reference detect function. */
-void
-ad7799_SetReference(                    const   uint8_t         state );
+/*******************************************************************************
+* REG X
+*******************************************************************************/
+extern  void    ad7799_x_init( void );
+extern  void    ad7799_x_enable( const bool );
+extern  uint8_t ad7799_x_xfer( uint8_t );
 
 
-#endif	// _AD7799_H_
+#endif	// AD7799_H

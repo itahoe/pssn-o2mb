@@ -82,8 +82,9 @@ bsp_oxgn_init_adc( void )
         hadc.Init.LowPowerAutoPowerOff          = DISABLE;
         hadc.Init.ContinuousConvMode            = DISABLE;
         hadc.Init.DiscontinuousConvMode         = ENABLE;
-        hadc.Init.ExternalTrigConv              = ADC_EXTERNALTRIGCONV_T3_TRGO;
-        hadc.Init.ExternalTrigConvEdge          = ADC_EXTERNALTRIGCONVEDGE_RISING;
+        hadc.Init.ExternalTrigConv              = ADC_SOFTWARE_START;
+        //hadc.Init.ExternalTrigConv              = ADC_EXTERNALTRIGCONV_T3_TRGO;
+        //hadc.Init.ExternalTrigConvEdge          = ADC_EXTERNALTRIGCONVEDGE_RISING;
         hadc.Init.DMAContinuousRequests         = ENABLE;
         hadc.Init.Overrun                       = ADC_OVR_DATA_OVERWRITTEN;
         if( HAL_ADC_Init( &hadc ) != HAL_OK )
@@ -143,6 +144,7 @@ bsp_oxgn_init_adc_dma( void )
         hdma_adc.Init.MemInc                    = DMA_MINC_ENABLE;
         hdma_adc.Init.PeriphDataAlignment       = DMA_PDATAALIGN_HALFWORD;
         hdma_adc.Init.MemDataAlignment          = DMA_MDATAALIGN_HALFWORD;
+        //hdma_adc.Init.Mode                      = DMA_NORMAL;
         hdma_adc.Init.Mode                      = DMA_CIRCULAR;
         hdma_adc.Init.Priority                  = DMA_PRIORITY_MEDIUM;
 
@@ -152,6 +154,8 @@ bsp_oxgn_init_adc_dma( void )
         }
 
         __HAL_LINKDMA( &hadc, DMA_Handle, hdma_adc );
+
+        //__HAL_ADC_ENABLE_IT( &hadc, ADC_FLAG_EOS );
 }
 
 
@@ -303,48 +307,29 @@ bsp_oxgn_init(                          const   size_t          samplerate_sps )
         bsp_oxgn_init_spi_io();
         bsp_oxgn_init_spi_dma();
 
-
         ad7799_reset();
-        //ad7799_SetMode( AD7799_MODE_SINGLE );
-        ad7799_SetMode( AD7799_MODE_CONT );
-        ad7799_SetChannel( AD7799_CH_AIN1P_AIN1M );
-        //ad7799_SetChannel( AD7799_CH_AIN2P_AIN2M );
+        ad7799_init();
+        ad7799_set_mode(        AD7799_MODE_IDLE                );
+        ad7799_set_rate(        AD7799_RATE_4_17_Hz             );
+        ad7799_set_burnout(     false                           );
+        ad7799_set_unipolar(    true                            );
+        ad7799_set_buffered(    true                            );
+        ad7799_set_gain(        AD7799_GAIN_1                   );
+        ad7799_set_refdet(      false                           );
 
-        uint32_t        cmd     = ad7799_reg_read( AD7799_REG_CONF, 2 );
-        cmd     &= ~AD7799_CONF_CHAN(0xFF);
-        cmd     |= AD7799_CONF_UNIPOLAR;
-        ad7799_reg_write( AD7799_REG_CONF, cmd, 2 );
+        ad7799_set_pwr_swtch(   false                           );
 
-        //ad7799_SetGain( AD7799_GAIN_2 );
-        ad7799_SetGain( AD7799_GAIN_1 );
-
-        //ad7799_reg_write( AD7799_REG_MODE, 0x00004000, 2 );
-        //ad7799_reg_write( AD7799_REG_MODE, 0x00002000, 2 );
+        ad7799_set_channel(     AD7799_CHNL_AIN1P_AIN1M         );
+        //ad7799_set_channel(     AD7799_CHNL_AVDD_MONITOR        );
 
 
-
-        //NVIC_SetPriority(       ADC1_IRQn,              BSP_NVIC_PRIO_SENS      );
-        //NVIC_EnableIRQ(         ADC1_IRQn                                       );
+        NVIC_SetPriority(       ADC1_IRQn,              BSP_NVIC_PRIO_SENS      );
+        NVIC_EnableIRQ(         ADC1_IRQn                                       );
 
         //NVIC_SetPriority(       DMA1_Channel1_IRQn,     BSP_NVIC_PRIO_SENS      );
         //NVIC_EnableIRQ(         DMA1_Channel1_IRQn                              );  
+
 }
-
-/*
-        uint32_t        d;
-
-
-        //d       = ad7799_reg_read( AD7799_REG_STAT, 1 );
-        //d       = ad7799_reg_read( AD7799_REG_MODE, 2 );
-        //d       = ad7799_reg_read( AD7799_REG_ID, 1 );
-        //d       = ad7799_reg_read( AD7799_REG_IO, 1 );
-        //d       = ad7799_reg_read( AD7799_REG_OFFSET, 3 );
-        //d       = ad7799_reg_read( AD7799_REG_FULLSALE, 3 );
-        d       = ad7799_reg_read( AD7799_REG_DATA, 3 );
-        //APP_TRACE( "%08X\n", d );
-        APP_TRACE( "%8d\n", d );
-
-*/
 
 
 /**
@@ -356,17 +341,17 @@ void
 bsp_oxgn_run(                           const   uint16_t *      data,
                                         const   size_t          len )
 {
-/*
         if( HAL_ADCEx_Calibration_Start( &hadc ) != HAL_OK )
         {
                 app_error_handler();
         }
-*/
 
         if( HAL_ADC_Start_DMA( &hadc, (uint32_t *) data, len ) != HAL_OK )
         {
                 app_error_handler();
         }
+
+
         __HAL_TIM_ENABLE_IT( &htim, TIM_IT_UPDATE );
 
         if( HAL_TIM_Base_Start( &htim ) != HAL_OK )
@@ -379,7 +364,12 @@ bsp_oxgn_run(                           const   uint16_t *      data,
 int32_t
 bsp_oxgn_read( void )
 {
-        return( ad7799_reg_read( AD7799_REG_DATA, 3 ) );
+        //HAL_ADC_Start_IT( &hadc );
+
+        ad7799_set_mode( AD7799_MODE_SINGLE );
+        while( !ad7799_sts_ready() );
+
+        return( ad7799_get_data() );
 }
 
 
@@ -405,10 +395,22 @@ bsp_oxgn_timebase_isr( void )
   * @param  None
   * @retval None
   */
-void
+bool
 bsp_oxgn_adc_isr( void )
 {
-        //HAL_ADC_IRQHandler( &hadc );
+        bool    end_of_seq      = false;
+
+        if( __HAL_ADC_GET_FLAG( &hadc, ADC_FLAG_EOS ) )
+        {
+                __HAL_ADC_CLEAR_FLAG( &hadc, ADC_FLAG_EOS );
+
+                end_of_seq      = true;
+        }
+
+
+        HAL_ADC_IRQHandler( &hadc );
+
+        return( end_of_seq );
 }
 
 
@@ -420,7 +422,7 @@ bsp_oxgn_adc_isr( void )
 void
 bsp_oxgn_adc_dma_isr( void )
 {
-        //HAL_DMA_IRQHandler( hadc.DMA_Handle );
+        HAL_DMA_IRQHandler( hadc.DMA_Handle );
 }
 
 

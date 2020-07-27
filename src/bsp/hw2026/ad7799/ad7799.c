@@ -5,284 +5,313 @@
   */
 
 
-/******************************************************************************/
-/* Include Files                                                              */
-/******************************************************************************/
-#include "AD7799.h"				// AD7799 definitions.
-#include "bsp.h"
+#include "ad7799.h"
 
 
-#define SPI_DELAY(ticks)        for( volatile int i = 0; i < ticks; i++ )
-#define AD7799_CS_LOW           do{ HAL_GPIO_WritePin( GPIOA, GPIO_PIN_4,  GPIO_PIN_RESET ); SPI_DELAY(500); } while(0)
-#define AD7799_CS_HIGH          do{ SPI_DELAY(500); HAL_GPIO_WritePin( GPIOA, GPIO_PIN_4,  GPIO_PIN_SET ); } while(0)
-
-#define SPI_SCK_HIGH()          HAL_GPIO_WritePin( GPIOA, GPIO_PIN_5,  GPIO_PIN_SET )
-#define SPI_SCK_LOW()           HAL_GPIO_WritePin( GPIOA, GPIO_PIN_5,  GPIO_PIN_RESET )
-#define SPI_MISO_READ()         ( HAL_GPIO_ReadPin( GPIOA, GPIO_PIN_6 ) == GPIO_PIN_SET )
-#define SPI_MOSI_WRITE( d )     HAL_GPIO_WritePin( GPIOA, GPIO_PIN_7, d ? GPIO_PIN_SET : GPIO_PIN_RESET )
-
-
+/*******************************************************************************
+*
+*******************************************************************************/
 static
-uint8_t
-bsp_spi_xfer_08(                                uint8_t         data )
+uint32_t
+ad7799_read(                            const   ad7799_reg_t    addr,
+                                        const   uint8_t         size )
 {
-        uint8_t         i;
+	uint32_t        data    = 0;	
 
 
-        for( i = 0x80; i > 0; i >>= 1 )
+	ad7799_x_enable( true );
+
+        ad7799_x_xfer( AD7799_COMM_READ | (addr << 3) );
+
+        for( int i = 0; i < size; i++ )
         {
-                SPI_SCK_LOW();
-
-                SPI_MOSI_WRITE( (data & i) );
-
-                SPI_DELAY( 100 );
-
-                if( SPI_MISO_READ() )
-                {
-                        data    |= i;
-                }
-                else
-                {
-                        data    &= ~i;
-                }
-
-                SPI_SCK_HIGH();
-
-                SPI_DELAY( 100 );
+                data    <<= 8;
+                data    += ad7799_x_xfer( 0x00 );
         }
+
+	ad7799_x_enable( false );
 
         return( data );
 }
 
 
-/***************************************************************************//**
- * @brief Initializes the AD7799 and checks if the device is present.
- *
- * @param None.
- *
- * @return status - Result of the initialization procedure.
- *                  Example: 1 - if initialization was successful (ID is 0x0B).
- *                           0 - if initialization was unsuccessful.
-*******************************************************************************/
-uint8_t
-ad7799_init( void )
-{ 
-	uint8_t         sts     = 0x1;
+static
+void
+ad7799_write(                           const   ad7799_reg_t    addr,
+                                                uint32_t        data,
+                                                uint8_t         size )
+{
+	ad7799_x_enable( true );	    
 
+        ad7799_x_xfer( AD7799_COMM_WRITE | (addr << 3) );
 
-	if(( ad7799_reg_read( AD7799_REG_ID, 1 ) & 0x0F) != AD7799_ID )
-	{
-		sts     = 0x0;
-	}
-	
-	return( sts );
+        while( size-- )
+        {
+                ad7799_x_xfer( data >> (8*size) );
+        }
+
+	ad7799_x_enable( false );
 }
 
 
-/***************************************************************************//**
- * @brief Sends 32 consecutive 1's on SPI in order to reset the part.
- *
- * @param None.
- *
- * @return  None.    
-*******************************************************************************/
+/**
+  * @brief  Initializes the AD7799 and checks if the device is present.
+  * @param  None
+  * @retval error (true : false)
+  */
+bool
+ad7799_init( void )
+{ 
+	bool    error   = false;
+
+
+        ad7799_x_init();
+
+	if(( ad7799_read( AD7799_REG_ID, 1 ) & 0x0F) != AD7799_ID )
+	{
+		error   = true;
+	}
+
+	return( error );
+}
+
+
+/**
+  * @brief  Sends 32 consecutive 1's on SPI in order to reset the part.  
+  * @param  None
+  * @retval None
+  */
 void
 ad7799_reset( void )
 {
-	uint8_t         data[4] = {0xff, 0xff, 0xff, 0xff};
-
-	AD7799_CS_LOW;	    
-
-	//SPI_Write( data, 4 );
-        bsp_spi_xfer_08( data[ 0] );
-        bsp_spi_xfer_08( data[ 1] );
-        bsp_spi_xfer_08( data[ 2] );
-        bsp_spi_xfer_08( data[ 3] );
-
-	AD7799_CS_HIGH;	
+	ad7799_x_enable( true );	    
+        ad7799_x_xfer( 0xFF );
+        ad7799_x_xfer( 0xFF );
+        ad7799_x_xfer( 0xFF );
+        ad7799_x_xfer( 0xFF );
+	ad7799_x_enable( false );	
 }
 
 
-/***************************************************************************//**
- * @brief Reads the value of the selected register
- *
- * @param regAddress - The address of the register to read.
- * @param size - The size of the register to read.
- *
- * @return data - The value of the selected register register.
+/*******************************************************************************
+* REG STATUS
+*******************************************************************************/
+bool
+ad7799_sts_ready( void )
+{
+        uint8_t ready   = AD7799_STS_READY & ad7799_read( AD7799_REG_STS, 1 );   
+
+        return( ready ? false : true );
+}
+
+
+bool
+ad7799_sts_error( void )
+{
+        uint8_t error   = AD7799_STS_ERROR & ad7799_read( AD7799_REG_STS, 1 );
+
+        return( error ? true : false );
+}
+
+
+bool
+ad7799_sts_noref( void )
+{
+        uint8_t noref   = AD7799_STS_NOREF & ad7799_read( AD7799_REG_STS, 1 );
+
+        return( noref ? true : false );
+}
+
+
+/*******************************************************************************
+* REG MODE
+*******************************************************************************/
+void
+ad7799_set_mode(                        const   ad7799_mode_t   mode )
+{
+        uint16_t        reg     = ad7799_read( AD7799_REG_MODE, 2 );
+
+
+        reg     &= ~( 0x7 << 13 );
+        reg     |= ( mode << 13 );
+
+        ad7799_write( AD7799_REG_MODE, reg, 2 );
+}
+
+
+void
+ad7799_set_pwr_swtch(                   const   bool            psw )
+{
+        uint16_t        reg     = ad7799_read( AD7799_REG_MODE, 2 );
+
+
+        reg     &= ~(1 << 12);
+        reg     |= ( (psw ? 1 : 0) << 12 );
+
+        ad7799_write( AD7799_REG_MODE, reg, 2 );
+}
+
+
+void
+ad7799_set_rate(                        const   ad7799_rate_t      rate )
+{
+        uint16_t        reg     = ad7799_read( AD7799_REG_MODE, 2 );
+
+
+        reg     &= ~( 0x000F );
+        reg     |= (uint16_t) rate;
+
+        ad7799_write( AD7799_REG_MODE, reg, 2 );
+}
+
+
+/*******************************************************************************
+* REG CONFIGURATION
+*******************************************************************************/
+void
+ad7799_set_burnout(                     const   bool            burnout )
+{
+        uint16_t        reg     = ad7799_read( AD7799_REG_CONF, 2 );
+
+
+        reg     &= ~(1 << 13);
+        reg     |= ( (burnout ? 1 : 0) << 13 );
+
+        ad7799_write( AD7799_REG_CONF, reg, 2 );
+}
+
+
+void
+ad7799_set_unipolar(                    const   bool            unipolar )
+{
+        uint16_t        reg     = ad7799_read( AD7799_REG_CONF, 2 );
+
+
+        reg     &= ~(1 << 12);
+        reg     |= ( (unipolar ? 1 : 0) << 12 );
+
+        ad7799_write( AD7799_REG_CONF, reg, 2 );
+}
+
+
+void
+ad7799_set_gain(                        const   ad7799_gain_t   gain )
+{
+        uint16_t        reg     = ad7799_read( AD7799_REG_CONF, 2 );
+
+
+        reg     &= ~( 0x7 << 8 );
+        reg     |= ( gain << 8 );
+
+        ad7799_write( AD7799_REG_CONF, reg, 2 );
+}
+
+
+void
+ad7799_set_refdet(                      const   bool            refdet )
+{
+        uint16_t        reg     = ad7799_read( AD7799_REG_CONF, 2 );
+
+
+        reg     &= ~(1 << 5);
+        reg     |= ( (refdet ? 1 : 0) << 5 );
+
+        ad7799_write( AD7799_REG_CONF, reg, 2 );
+}
+
+
+void
+ad7799_set_buffered(                    const   bool            buf )
+{
+        uint16_t        reg     = ad7799_read( AD7799_REG_CONF, 2 );
+
+
+        reg     &= ~(1 << 4);
+        reg     |= ( (buf ? 1 : 0) << 4 );
+
+        ad7799_write( AD7799_REG_CONF, reg, 2 );
+}
+
+
+void
+ad7799_set_channel(                     const   ad7799_chnl_t   chnl )
+{
+        uint16_t        reg     = ad7799_read( AD7799_REG_CONF, 2 );
+
+
+        reg     &= ~( 0x7 << 0 );
+        reg     |= ( chnl << 0 );
+
+        ad7799_write( AD7799_REG_CONF, reg, 2 );
+}
+
+
+/*******************************************************************************
+* REG DATA
 *******************************************************************************/
 uint32_t
-ad7799_reg_read(                const   uint8_t         addr,
-                                        const   uint8_t         size )
+ad7799_get_data( void )
 {
-	uint32_t        data32          = 0;	
-	uint8_t         data[ 4]        = {0x00, 0x00, 0x00, 0x00};
-        //uint8_t         cmd             = AD7799_COMM_READ | AD7799_COMM_ADDR( addr );
-
-
-	AD7799_CS_LOW;
-
-        //bsp_spi_xfer_08( cmd );
-        bsp_spi_xfer_08( AD7799_COMM_READ | AD7799_COMM_ADDR( addr ) );
-
-        for( int i = 0; i < size; i++ )
-        {
-                data32  <<= 8;
-                data32  += bsp_spi_xfer_08( data[ i] );
-        }
-
-	AD7799_CS_HIGH;
-
-        return( data32 );
+        return( ad7799_read( AD7799_REG_DATA, 3 ) );
 }
 
 
-/***************************************************************************//**
- * @brief Writes the value to the register
- *
- * @param -  regAddress - The address of the register to write to.
- * @param -  regValue - The value to write to the register.
- * @param -  size - The size of the register to write.
- *
- * @return  None.    
-*******************************************************************************/
-void
-ad7799_reg_write(                const   uint8_t         addr,
-					const   uint32_t        data,
-					const   uint8_t         size )
-{
-	uint8_t         buf[ 4] = {0x00, 0x00, 0x00, 0x00};	
-
-
-        uint8_t         cmd             = AD7799_COMM_WRITE |  AD7799_COMM_ADDR( addr );
-
-        if( size == 1 )
-        {
-                buf[ 0]         = ( uint8_t )   data;
-        }
-        if( size == 2 )
-        {
-		buf[ 1]         = ( uint8_t ) ((data & 0x0000FF) >>  0);
-                buf[ 0]         = ( uint8_t ) ((data & 0x00FF00) >>  8);
-        }
-        if( size == 3 )
-        {
-		buf[ 2]         = ( uint8_t ) ((data & 0x0000FF) >>  0);
-		buf[ 1]         = ( uint8_t ) ((data & 0x00FF00) >>  8);
-                buf[ 0]         = ( uint8_t ) ((data & 0xFF0000) >> 16);
-        }
-
-	AD7799_CS_LOW;	    
-
-
-        cmd     = bsp_spi_xfer_08( cmd );
-
-        for( int i = 0; i < size; i++ )
-        {
-                buf[ i]         = bsp_spi_xfer_08( buf[ i] );
-        }
-
-	AD7799_CS_HIGH;
-}
-
-
-/***************************************************************************//**
- * @brief Reads /RDY bit of status reg.
- *
- * @param None.
- *
- * @return rdy	- 0 if RDY is 1.
- *              - 1 if RDY is 0.
+/*******************************************************************************
+* REG ID
 *******************************************************************************/
 uint8_t
-ad7799_Ready( void )
+ad7799_get_id( void )
 {
-        uint8_t         rdy     = 0;
-
-
-        rdy     = ( ad7799_reg_read( AD7799_REG_STAT,1) & 0x80 );   
-        return( !rdy );
+        return( ad7799_read( AD7799_REG_ID, 1 ) );
 }
 
 
-/***************************************************************************//**
- * @brief Sets the operating mode of AD7799.
- *
- * @param mode - Mode of operation.
- *
- * @return  None.    
+/*******************************************************************************
+* REG IO
 *******************************************************************************/
-void
-ad7799_SetMode(                         const   uint32_t        mode )
+uint8_t
+ad7799_get_io( void )
 {
-        uint32_t        cmd     = ad7799_reg_read( AD7799_REG_MODE, 2 );
-
-
-        cmd     &= ~AD7799_MODE_SEL( 0xFF );
-        cmd     |= AD7799_MODE_SEL( mode );
-
-        ad7799_reg_write( AD7799_REG_MODE, cmd, 2 );
+        return( ad7799_read( AD7799_REG_IO, 1 ) );
 }
 
 
-/***************************************************************************//**
- * @brief Selects the channel of AD7799.
- *
- * @param  channel - ADC channel selection.
- *
- * @return  None.    
-*******************************************************************************/
 void
-ad7799_SetChannel(                      const   uint32_t        chnl )
+ad7799_set_io(                          const   uint8_t         data )
 {
-        uint32_t        cmd     = ad7799_reg_read( AD7799_REG_CONF, 2 );
-
-
-        cmd     &= ~AD7799_CONF_CHAN(0xFF);
-        cmd     |= AD7799_CONF_CHAN( chnl );
-
-        ad7799_reg_write( AD7799_REG_CONF, cmd, 2 );
+        ad7799_write( AD7799_REG_IO, data, 1 );
 }
 
 
-/***************************************************************************//**
- * @brief  Sets the gain of the In-Amp.
- *
- * @param  gain - Gain.
- *
- * @return  None.    
+/*******************************************************************************
+* REG OFFSET
 *******************************************************************************/
-void
-ad7799_SetGain(                         const   uint32_t        gain )
+uint32_t
+ad7799_get_offset( void )
 {
-    uint32_t    cmd;
-
-
-        cmd     = ad7799_reg_read( AD7799_REG_CONF, 2 );
-        cmd     &= ~AD7799_CONF_GAIN( 0xFF );
-        cmd     |= AD7799_CONF_GAIN( gain );
-
-        ad7799_reg_write( AD7799_REG_CONF, cmd, 2 );
+        return( ad7799_read( AD7799_REG_OFFSET, 3 ) );
 }
 
 
-/***************************************************************************//**
- * @brief Enables or disables the reference detect function.
- *
- * @param state - State of the reference detect function.
- *               Example: 0	- Reference detect disabled.
- *                        1	- Reference detect enabled.
- *
- * @return None.    
-*******************************************************************************/
 void
-ad7799_SetReference(                    const   uint8_t         state )
+ad7799_set_offset(                      const   uint32_t        data )
 {
-        uint32_t        cmd     = ad7799_reg_read( AD7799_REG_CONF, 2 );
+        ad7799_write( AD7799_REG_OFFSET, data, 3 );
+}
 
 
-        cmd     &= ~AD7799_CONF_REFDET( 1 );
-        cmd     |= AD7799_CONF_REFDET( state );
+/*******************************************************************************
+* REG FULL-SCALE
+*******************************************************************************/
+uint32_t
+ad7799_get_fullscale( void )
+{
+        return( ad7799_read( AD7799_REG_FULLSALE, 3 ) );
+}
 
-        ad7799_reg_write( AD7799_REG_CONF, cmd, 2);
+
+void
+ad7799_set_fullscale(                   const   uint32_t        data )
+{
+        ad7799_write( AD7799_REG_FULLSALE, data, 3 );
 }

@@ -15,10 +15,8 @@
 #include "app.h"
 
 
-//#define OXGN_RAW_SIZEOF                 3
 #define OXGN_RAW_SIZEOF                 2
-//#define SENS_O2_AVERAGE_BUF_SIZEOF      8
-#define SENS_O2_AVERAGE_BUF_SIZEOF      64
+#define SENS_O2_AVERAGE_BUF_SIZEOF      16
 
 
 static  uint8_t         modbus_adu[ MDBS_RTU_ADU_SIZEOF ];
@@ -107,6 +105,18 @@ app_sens_hook( void )
   * @param  None
   * @retval None
   */
+void
+app_adc_eos_hook( void )
+{
+        app.evt.adc     =   true;
+}
+
+
+/**
+  * @brief  
+  * @param  None
+  * @retval None
+  */
 static
 void
 app_nvm_restore()
@@ -172,8 +182,8 @@ int main( void )
         ui_led_sts_init();
         ui_led_sts_set( true );
 
-        sens_oxgn_init( CFG_SENS_OXGN_SMPLRATE_SPS );
-        //sens_oxgn_init( 1 );
+        //sens_oxgn_init( CFG_SENS_OXGN_SMPLRATE_SPS );
+        sens_oxgn_init( 1 );
         sens_oxgn_run( adc_raw, OXGN_RAW_SIZEOF );
 
         sys_ser1_init( CFG_MDBS_BAUDRATE );

@@ -57,7 +57,7 @@ int32_t
 bsp_oxgn_read( void );
 
 
-void
+bool
 bsp_oxgn_adc_isr( void );
 
 void
