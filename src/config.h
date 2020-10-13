@@ -9,9 +9,11 @@
 #define  CONFIG_H
 
 
-#include "config_mdbs.h"
-#include "config_sens.h"
-#include "config_ui.h"
+#include "cfg_mdbs.h"
+#include "cfg_sens.h"
+#include "cfg_ui.h"
+#include "cfg_lm75.h"
+#include "cfg_lps25.h"
 
 
 #endif	//CONFIG_H

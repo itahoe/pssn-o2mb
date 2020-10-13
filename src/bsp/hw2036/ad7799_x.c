@@ -1,6 +1,6 @@
 /**
-  * @file    bsp_oxgn.c
-  * @brief   Oxigen Sensor ADC Hardware Routins
+  * @file    bsp_ad7799.c
+  * @brief   AD7799 low-level routins
   * @author  Igor T. <research.tahoe@gmail.com>
   */
 
@@ -10,12 +10,19 @@
 #include "ad7799.h"
 
 
+//void    ad7799_x_init( void );
+//void    ad7799_x_enable( const bool );
+//uint8_t ad7799_x_xfer( uint8_t );
+
+/*
 static  ADC_HandleTypeDef       hadc;
 static  TIM_HandleTypeDef       htim;
-static  SPI_HandleTypeDef       hspi;
 static  DMA_HandleTypeDef       hdma_adc, hdma_rx, hdma_tx;
+*/
 
+static  SPI_HandleTypeDef       hspi;
 
+/*
 static
 void
 bsp_oxgn_init_timebase(                 const   size_t          samplerate_sps )
@@ -55,8 +62,8 @@ bsp_oxgn_init_timebase(                 const   size_t          samplerate_sps )
         NVIC_SetPriority(       TIM3_IRQn,      BSP_NVIC_PRIO_SENS      );
         NVIC_EnableIRQ(         TIM3_IRQn                               );
 }
-
-
+*/
+/*
 static
 void
 bsp_oxgn_init_adc( void )
@@ -92,23 +99,6 @@ bsp_oxgn_init_adc( void )
                 app_error_handler();
         }
 
-/*
-        cfg.Channel                             = ADC_CHANNEL_4;
-        cfg.Rank                                = ADC_RANK_CHANNEL_NUMBER;
-        cfg.SamplingTime                        = ADC_SAMPLETIME_239CYCLES_5;
-        if( HAL_ADC_ConfigChannel( &hadc, &cfg ) != HAL_OK )
-        {
-                app_error_handler();
-        }
-
-        cfg.Channel                             = ADC_CHANNEL_6;
-        cfg.Rank                                = ADC_RANK_CHANNEL_NUMBER;
-        cfg.SamplingTime                        = ADC_SAMPLETIME_239CYCLES_5;
-        if( HAL_ADC_ConfigChannel( &hadc, &cfg ) != HAL_OK )
-        {
-                app_error_handler();
-        }
-*/
         cfg.Channel                             = ADC_CHANNEL_VREFINT;
         cfg.Rank                                = ADC_RANK_CHANNEL_NUMBER;
         cfg.SamplingTime                        = ADC_SAMPLETIME_239CYCLES_5;
@@ -125,15 +115,15 @@ bsp_oxgn_init_adc( void )
                 app_error_handler();
         }
 }
-
-
+*/
+/*
 static
 void
 bsp_oxgn_init_adc_io( void )
 {
 }
-
-
+*/
+/*
 static
 void
 bsp_oxgn_init_adc_dma( void )
@@ -157,7 +147,7 @@ bsp_oxgn_init_adc_dma( void )
 
         //__HAL_ADC_ENABLE_IT( &hadc, ADC_FLAG_EOS );
 }
-
+*/
 
 static
 void
@@ -254,7 +244,7 @@ bsp_oxgn_init_spi_io( void )
         //HAL_GPIO_WritePin( GPIOA, GPIO_PIN_4, GPIO_PIN_SET );
 }
 
-
+/*
 static
 void
 bsp_oxgn_init_spi_dma( void )
@@ -292,8 +282,8 @@ bsp_oxgn_init_spi_dma( void )
 
         __HAL_LINKDMA( &hspi, hdmatx, hdma_tx );
 }
-
-
+*/
+/*
 void
 bsp_oxgn_init(                          const   size_t          samplerate_sps )
 {
@@ -336,145 +326,77 @@ bsp_oxgn_init(                          const   size_t          samplerate_sps )
         //NVIC_EnableIRQ(         DMA1_Channel1_IRQn                              );  
 
 }
+*/
 
-
-/**
-  * @brief  
-  * @param  None
-  * @retval None
-  */
 void
-bsp_oxgn_run(                           const   uint16_t *      data,
-                                        const   size_t          len )
+ad7799_x_init( void )
 {
-        if( HAL_ADCEx_Calibration_Start( &hadc ) != HAL_OK )
-        {
-                app_error_handler();
-        }
+        //bsp_oxgn_init_timebase( 1 );
+        //bsp_oxgn_init_adc();
+        //bsp_oxgn_init_adc_io();
+        //bsp_oxgn_init_adc_dma();
 
-        if( HAL_ADC_Start_DMA( &hadc, (uint32_t *) data, len ) != HAL_OK )
-        {
-                app_error_handler();
-        }
+        bsp_oxgn_init_spi();
+        bsp_oxgn_init_spi_io();
+        //bsp_oxgn_init_spi_dma();
 
+        NVIC_SetPriority(       ADC1_IRQn,              BSP_NVIC_PRIO_SENS      );
+        NVIC_EnableIRQ(         ADC1_IRQn                                       );
 
-        __HAL_TIM_ENABLE_IT( &htim, TIM_IT_UPDATE );
+        //NVIC_SetPriority(       DMA1_Channel1_IRQn,     BSP_NVIC_PRIO_SENS      );
+        //NVIC_EnableIRQ(         DMA1_Channel1_IRQn                              );  
 
-        if( HAL_TIM_Base_Start( &htim ) != HAL_OK )
-        {
-                app_error_handler();
-        }
 }
 
 
-int32_t
-bsp_oxgn_read( void )
-{
-        //HAL_ADC_Start_IT( &hadc );
-
-        ad7799_set_mode( AD7799_MODE_SINGLE );
-        while( !ad7799_sts_ready() );
-
-        return( ad7799_get_data() );
-}
-
-
-/**
-  * @brief  
-  * @param  None
-  * @retval None
-  */
 void
-bsp_oxgn_timebase_isr( void )
+ad7799_x_enable(                        const   bool    enable )
 {
-        //HAL_TIM_IRQHandler( &htim );
-
-        if( __HAL_TIM_GET_FLAG( &htim, TIM_FLAG_UPDATE ) )
+        if( enable )
         {
-                __HAL_TIM_CLEAR_FLAG( &htim, TIM_FLAG_UPDATE );
+                HAL_GPIO_WritePin( GPIOA, GPIO_PIN_4,  GPIO_PIN_RESET );
+        }
+        else
+        {
+                HAL_GPIO_WritePin( GPIOA, GPIO_PIN_4,  GPIO_PIN_SET );
         }
 }
 
 
-/**
-  * @brief  
-  * @param  None
-  * @retval None
-  */
-bool
-bsp_oxgn_adc_isr( void )
+#define SPI_DELAY(ticks)        for( volatile int i = 0; i < ticks; i++ )
+#define SPI_SCK_HIGH()          HAL_GPIO_WritePin( GPIOA, GPIO_PIN_5,  GPIO_PIN_SET )
+#define SPI_SCK_LOW()           HAL_GPIO_WritePin( GPIOA, GPIO_PIN_5,  GPIO_PIN_RESET )
+#define SPI_MISO_READ()         ( HAL_GPIO_ReadPin( GPIOA, GPIO_PIN_6 ) == GPIO_PIN_SET )
+#define SPI_MOSI_WRITE( d )     HAL_GPIO_WritePin( GPIOA, GPIO_PIN_7, d ? GPIO_PIN_SET : GPIO_PIN_RESET )
+
+
+uint8_t
+ad7799_x_xfer( uint8_t data )
 {
-        bool    end_of_seq      = false;
+        uint8_t         i;
 
-        if( __HAL_ADC_GET_FLAG( &hadc, ADC_FLAG_EOS ) )
+
+        for( i = 0x80; i > 0; i >>= 1 )
         {
-                __HAL_ADC_CLEAR_FLAG( &hadc, ADC_FLAG_EOS );
+                SPI_SCK_LOW();
 
-                end_of_seq      = true;
+                SPI_MOSI_WRITE( (data & i) );
+
+                //SPI_DELAY( 100 );
+
+                if( SPI_MISO_READ() )
+                {
+                        data    |= i;
+                }
+                else
+                {
+                        data    &= ~i;
+                }
+
+                SPI_SCK_HIGH();
+
+                //SPI_DELAY( 100 );
         }
 
-
-        HAL_ADC_IRQHandler( &hadc );
-
-        return( end_of_seq );
-}
-
-
-/**
-  * @brief  
-  * @param  None
-  * @retval None
-  */
-void
-bsp_oxgn_adc_dma_isr( void )
-{
-        HAL_DMA_IRQHandler( hadc.DMA_Handle );
-}
-
-
-/*******************************************************************************
-* OXGN OFST
-*******************************************************************************/
-/**
-  * @brief  
-  * @param  None
-  * @retval None
-  */
-void
-bsp_oxgn_ofst_init(                     const   size_t          samplerate_sps )
-{
-}
-
-
-/**
-  * @brief  
-  * @param  None
-  * @retval None
-  */
-void
-bsp_oxgn_ofst_run( void )
-{
-}
-
-
-/**
-  * @brief  
-  * @param  None
-  * @retval None
-  */
-void
-bsp_oxgn_ofst_set(                              const   uint16_t        raw16 )
-{
-}
-
-
-/**
-  * @brief  
-  * @param  None
-  * @retval None
-  */
-uint16_t
-bsp_oxgn_ofst_get( void )
-{
-        return( 0 );
+        return( data );
 }

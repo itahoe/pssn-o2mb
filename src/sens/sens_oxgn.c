@@ -14,26 +14,27 @@
 #include "app.h"
 
 
-#define SENS_OXGN_T_COEF_ENABLE         0
-
-
 /*******************************************************************************
-* STATIC FUNCTIONS
+* PRIVATE
 *******************************************************************************/
+/*
 static
 float
-sens_coef_get(                          const   int32_t                 t )
+//sens_coef_get(                          const   float           t_digc )
+sens_get_k_temp_digc(                   const   float           t_digc )
 {
-        #if SENS_OXGN_T_COEF_ENABLE > 0
+        #if SENS_OXGN_T_COEF_DISABLE > 0
+        return( 1 );
+        #else
         const   float   a       =  2.01e-06;
         const   float   b       = -2.60e-05;
         const   float   c       =  1.70e-02;
         const   float   d       =  5.61e-01;
-        return( (powf( t, 3) * a) + (powf( t, 2) * b) + ( t * c) + d );
-        #else
-        return( 1 );
+        return( (powf(t_digc, 3) * a) + (powf(t_digc, 2) * b) + (t_digc * c) + d );
         #endif
 }
+*/
+
 
 
 /*******************************************************************************
@@ -56,12 +57,13 @@ sens_oxgn_init(                         const   size_t          samplerate_sps )
   * @param  None
   * @retval None
   */
+/*
 int32_t
 sens_oxgn_read( void )
 {
         return( bsp_oxgn_read() );
 }
-
+*/
 
 /**
   * @brief  
@@ -69,7 +71,7 @@ sens_oxgn_read( void )
   * @retval None
   */
 void
-sens_oxgn_run(                          const   uint16_t *      data,
+sens_oxgn_stream_run(                   const   uint16_t *      data,
                                         const   size_t          len )
 {
         bsp_oxgn_run( data, len );
@@ -87,8 +89,8 @@ sens_oxgn_raw_avrg(                             sens_avrg_t *           p,
 {
         p->sum                  -= p->buf[ p->idx ];
         p->sum                  += sample;
-        p->buf[ p->idx ]        =  sample;
-        p->idx++;
+
+        p->buf[ p->idx++ ]      =  sample;
 
         if( p->idx >= p->buf_sizeof )
         {
@@ -105,7 +107,7 @@ sens_oxgn_raw_avrg(                             sens_avrg_t *           p,
   * @retval None
   */
 int32_t
-sens_oxgn_get_instability(                      sens_avrg_t *           p,
+sens_oxgn_get_slope(                            sens_avrg_t *           p,
                                                 int32_t                 sample )
 {
         int32_t         diff    = 0;
@@ -121,24 +123,6 @@ sens_oxgn_get_instability(                      sens_avrg_t *           p,
 
 
 /*******************************************************************************
-* CALIBRATE
-*******************************************************************************/
-/**
-  * @brief  
-  * @param  None
-  * @retval None
-  */
-void
-sens_trim_restore(                              sens_trim_t *           p )
-{
-        float   x       = p->ppm[ 1].u32 - p->ppm[ 0].u32;
-        float   y       = p->raw[ 1].u32 - p->raw[ 0].u32;
-        p->tg           = x / y;
-        p->ofst         = p->ppm[ 1].u32 - (p->tg * p->raw[ 1].u32);
-}
-
-
-/*******************************************************************************
         example:
         signal @ T[у]=signal @ 25у x Pcoe @ T[у]
         signal @ (0у)=signal @ 25у x 0.561
@@ -148,33 +132,33 @@ sens_trim_restore(                              sens_trim_t *           p )
   * @param  None
   * @retval None
   */
+/*
 int32_t
 sens_oxgn_raw_to_ppm(                   const   sens_trim_t *           p,
                                         const   int32_t                 raw,
-                                        const   int32_t                 t )
+                                        const   int32_t                 t_digc )
 {
-        const   float   k       = sens_coef_get( t );
+        const   float   k       = sens_get_k_temp_digc( t_digc );
         const   float   ppm     = (raw * p->tg) + p->ofst;
-
-
         return( (int32_t) ((ppm / k) + 0.5) );
 }
-
+*/
 
 /**
   * @brief  
   * @param  None
   * @retval None
   */
+/*
 int32_t
 sens_oxgn_avrg_to_ppm(                  const   sens_trim_t *           p,
                                         const   int32_t                 avrg,
                                         const   int32_t                 avrg_sizeof,
-                                        const   int32_t                 t )
+                                        const   float                   t_digc )
 {
-        const   float   k       = sens_coef_get( t );
+        const   float   k       = sens_get_k_temp_digc( t_digc );
         const   float   ppm     = (avrg * p->tg) / avrg_sizeof + p->ofst;
-
-
-        return( (int32_t) ((ppm / k) + 0.5) );
+        return( (int32_t) ( (float) (ppm / k) + 0.5) );
 }
+*/
+

@@ -10,10 +10,20 @@
 
 
 #include <stdint.h>
+#include <stdio.h>
 #include "config.h"
 
 
 typedef uint16_t (* sens_mcu_func_t) (const size_t idx);
+
+
+typedef union
+{
+        int32_t                 i32;
+        uint32_t                u32;
+        uint16_t                u16[ 2];
+        float                   f32;
+} sens_union_t;
 
 
 typedef struct  sens_avrg_s
@@ -22,45 +32,33 @@ typedef struct  sens_avrg_s
         size_t                  buf_sizeof;
         size_t                  idx;
         int32_t                 sum;
+        uint16_t                slope;
 } sens_avrg_t;
-
-
-typedef union
-{
-        int32_t                 i32;
-        uint32_t                u32;
-        uint16_t                u16[ 2];
-} sens_union_t;
-
-
-typedef struct  sens_oxgn_s
-{
-        sens_union_t            ppm;
-        int32_t                 avrg;
-        uint16_t                instability;
-        uint16_t                offset;
-} sens_oxgn_t;
 
 
 typedef struct  sens_trim_s
 {
-        sens_union_t            raw[ CFG_SENS_TRIM_NUM_POINTS ];
-        sens_union_t            ppm[ CFG_SENS_TRIM_NUM_POINTS ];
-        sens_union_t            timestamp[ CFG_SENS_TRIM_NUM_POINTS ];
+        sens_union_t            timestmp[ CFG_SENS_TRIM_NUM_POINTS ];
+        sens_union_t            oxgn_ppm[ CFG_SENS_TRIM_NUM_POINTS ];
+        sens_union_t            oxgn_raw[ CFG_SENS_TRIM_NUM_POINTS ];
+        sens_union_t            temp_raw[ CFG_SENS_TRIM_NUM_POINTS ];
+        sens_union_t            pres_raw[ CFG_SENS_TRIM_NUM_POINTS ];
         float                   ofst;
         float                   tg;
 } sens_trim_t;
 
 
-typedef struct  sens_lm75_s
+typedef struct  sens_oxgn_s
 {
-        int32_t                 celsius;
-} sens_lm75_t;
+        sens_union_t            raw;
+        sens_union_t            ppm;
+        uint16_t                offset;
+} sens_oxgn_t;
 
 
 typedef struct  sens_mcu_s
 {
-        int32_t                 celsius;
+        int32_t                 degc;
         int32_t                 vref_mV;
         sens_mcu_func_t         serial_num;
         sens_mcu_func_t         device_id;
@@ -70,13 +68,28 @@ typedef struct  sens_mcu_s
 } sens_mcu_t;
 
 
+typedef struct  sens_temp_s
+{
+        sens_union_t            raw;
+        sens_union_t            digc;
+} sens_temp_t;
+
+
+typedef struct  sens_pres_s
+{
+        sens_union_t            raw;
+        sens_union_t            hPa;
+} sens_pres_t;
+
+
 typedef struct  sens_s
 {
-        sens_oxgn_t             oxgn;
         sens_trim_t             trim;
-        sens_lm75_t             lm75;
         sens_mcu_t              mcu;
         sens_avrg_t             avrg;
+        sens_oxgn_t             oxgn;
+        sens_temp_t             temp;
+        sens_pres_t             pres;
 } sens_t;
 
 
@@ -84,7 +97,15 @@ typedef struct  sens_s
 * 
 *******************************************************************************/
 void
-sens_trim_restore(                              sens_trim_t *   p );
+sens_trim_restore(                              sens_trim_t *           p,
+                                        const   float                   t_cels );
+
+
+/*******************************************************************************
+* SENS
+*******************************************************************************/
+float
+sens_get_k_temp_digc(                   const   float           t_digc );
 
 
 /*******************************************************************************
@@ -92,31 +113,42 @@ sens_trim_restore(                              sens_trim_t *   p );
 *******************************************************************************/
 void
 sens_oxgn_init(                         const   size_t          samplerate_sps );
-
-
+/*
 int32_t
 sens_oxgn_read( void );
+*/
 
-
+/*******************************************************************************
+* SENS OXGN STREAM
+*******************************************************************************/
 void
-sens_oxgn_run(                          const   uint16_t *      data,
+sens_oxgn_stream_run(                   const   uint16_t *      data,
                                         const   size_t          len );
 
+
+/*******************************************************************************
+* SENS OXGN CONVERSION
+*******************************************************************************/
 int32_t
 sens_oxgn_raw_avrg(                             sens_avrg_t *   p,
                                                 int32_t         sample );
 
-
+/*
 int32_t
 sens_oxgn_raw_to_ppm(                   const   sens_trim_t *   p,
                                         const   int32_t         raw,
-                                        const   int32_t         t );
+                                        const   int32_t         t_cels );
+*/
+
+int32_t
+sens_oxgn_raw_to_ppm(                   const   sens_t *        p );
+
 
 int32_t
 sens_oxgn_avrg_to_ppm(                  const   sens_trim_t *   p,
                                         const   int32_t         avrg,
                                         const   int32_t         avrg_sizeof,
-                                        const   int32_t         t );
+                                        const   float           t_cels );
 
 int32_t
 sens_oxgn_raw_avrg(                             sens_avrg_t *   p,
@@ -124,7 +156,7 @@ sens_oxgn_raw_avrg(                             sens_avrg_t *   p,
 
 
 int32_t
-sens_oxgn_get_instability(                      sens_avrg_t *   p,
+sens_oxgn_get_slope(                            sens_avrg_t *   p,
                                                 int32_t         sample );
 
 
