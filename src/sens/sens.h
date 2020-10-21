@@ -28,21 +28,30 @@ typedef union
 
 typedef struct  sens_avrg_s
 {
-        int32_t *               buf;
+        uint32_t *              buf;
         size_t                  buf_sizeof;
         size_t                  idx;
-        int32_t                 sum;
+        uint32_t                sum;
         uint16_t                slope;
 } sens_avrg_t;
 
+typedef struct  sens_trim_point_s
+{
+        sens_union_t            timestmp;
+        sens_union_t            oxgn_ppm;
+        sens_union_t            oxgn_raw;
+        int16_t                 temp_raw;
+        sens_union_t            pres_raw;
+} sens_trim_point_t;
 
 typedef struct  sens_trim_s
 {
-        sens_union_t            timestmp[ CFG_SENS_TRIM_NUM_POINTS ];
-        sens_union_t            oxgn_ppm[ CFG_SENS_TRIM_NUM_POINTS ];
-        sens_union_t            oxgn_raw[ CFG_SENS_TRIM_NUM_POINTS ];
-        sens_union_t            temp_raw[ CFG_SENS_TRIM_NUM_POINTS ];
-        sens_union_t            pres_raw[ CFG_SENS_TRIM_NUM_POINTS ];
+        //sens_union_t            timestmp[ CFG_SENS_TRIM_NUM_POINTS ];
+        //sens_union_t            oxgn_ppm[ CFG_SENS_TRIM_NUM_POINTS ];
+        //sens_union_t            oxgn_raw[ CFG_SENS_TRIM_NUM_POINTS ];
+        //int16_t                 temp_raw[ CFG_SENS_TRIM_NUM_POINTS ];
+        //sens_union_t            pres_raw[ CFG_SENS_TRIM_NUM_POINTS ];
+        sens_trim_point_t       point[ CFG_SENS_TRIM_NUM_POINTS ];
         float                   ofst;
         float                   tg;
 } sens_trim_t;
@@ -70,8 +79,10 @@ typedef struct  sens_mcu_s
 
 typedef struct  sens_temp_s
 {
-        sens_union_t            raw;
+        //sens_union_t            raw;
+        int16_t                 raw;
         sens_union_t            digc;
+        //sens_avrg_t             avrg;
 } sens_temp_t;
 
 
@@ -79,6 +90,7 @@ typedef struct  sens_pres_s
 {
         sens_union_t            raw;
         sens_union_t            hPa;
+        sens_avrg_t             avrg;
 } sens_pres_t;
 
 
@@ -104,9 +116,10 @@ sens_trim_restore(                              sens_trim_t *           p,
 /*******************************************************************************
 * SENS
 *******************************************************************************/
+/*
 float
 sens_get_k_temp_digc(                   const   float           t_digc );
-
+*/
 
 /*******************************************************************************
 * SENS OXGN
@@ -129,30 +142,26 @@ sens_oxgn_stream_run(                   const   uint16_t *      data,
 /*******************************************************************************
 * SENS OXGN CONVERSION
 *******************************************************************************/
-int32_t
-sens_oxgn_raw_avrg(                             sens_avrg_t *   p,
-                                                int32_t         sample );
-
 /*
-int32_t
-sens_oxgn_raw_to_ppm(                   const   sens_trim_t *   p,
-                                        const   int32_t         raw,
-                                        const   int32_t         t_cels );
+uint32_t
+sens_oxgn_raw_avrg(                             sens_avrg_t *   p,
+                                                uint32_t        sample );
 */
 
-int32_t
-sens_oxgn_raw_to_ppm(                   const   sens_t *        p );
-
-
+/*
 int32_t
 sens_oxgn_avrg_to_ppm(                  const   sens_trim_t *   p,
                                         const   int32_t         avrg,
                                         const   int32_t         avrg_sizeof,
                                         const   float           t_cels );
+*/
 
-int32_t
+uint32_t
+sens_oxgn_raw_to_ppm(                   const   sens_t *        p );
+
+uint32_t
 sens_oxgn_raw_avrg(                             sens_avrg_t *   p,
-                                                int32_t         sample );
+                                                uint32_t        sample );
 
 
 int32_t
@@ -163,6 +172,7 @@ sens_oxgn_get_slope(                            sens_avrg_t *   p,
 /*******************************************************************************
 * SENS OXGN OFST
 *******************************************************************************/
+/*
 void
 sens_oxgn_ofst_init(                    const   size_t          samplerate_sps );
 
@@ -174,7 +184,7 @@ sens_oxgn_ofst_set(                     const   uint16_t        raw16 );
 
 uint16_t
 sens_oxgn_ofst_get( void );
-
+*/
 
 /*******************************************************************************
 * SENS MCU

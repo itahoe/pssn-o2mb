@@ -246,11 +246,13 @@ mdbs_hreg_read(                         const   size_t                  idx,
                         break;
 
                 case MDBS_HREG_TEMP_RAW_HI:
-                        *data   = sens.temp.raw.u16[ 1];
+                        //*data   = sens.temp.raw.u16[ 1];
+                        *data   = 0;
                         break;
 
                 case MDBS_HREG_TEMP_RAW_LO:
-                        *data   = sens.temp.raw.u16[ 0];
+                        //*data   = sens.temp.raw.u16[ 0];
+                        *data   = sens.temp.raw;
                         break;
 
                 case MDBS_HREG_PRES_RAW_HI:
@@ -266,28 +268,35 @@ mdbs_hreg_read(                         const   size_t                  idx,
                         break;
 
                 case MDBS_HREG_SENS_OFST_RAW:
-                        *data   = sens_oxgn_ofst_get();
+                        //*data   = sens_oxgn_ofst_get();
+                        *data   = 0;
                         break;
 
 
                 case MDBS_HREG_SENS_TRIM_P0_TIMESTMP_HI:
-                        *data   = sens.trim.timestmp[ 0].u16[ 1];
+                        *data   = sens.trim.point[ 0].timestmp.u16[ 1];
                         break;
 
                 case MDBS_HREG_SENS_TRIM_P0_TIMESTMP_LO:
-                        *data   = sens.trim.timestmp[ 0].u16[ 0];
+                        *data   = sens.trim.point[ 0].timestmp.u16[ 0];
                         break;
 
                 case MDBS_HREG_SENS_TRIM_P0_OXGN_PPM_HI:
-                        *data   = sens.trim.oxgn_ppm[ 0].u16[ 1];
+                        *data   = sens.trim.point[ 0].oxgn_ppm.u16[ 1];
                         break;
 
                 case MDBS_HREG_SENS_TRIM_P0_OXGN_PPM_LO:
-                        *data   = sens.trim.oxgn_ppm[ 0].u16[ 0];
+                        *data   = sens.trim.point[ 0].oxgn_ppm.u16[ 0];
                         break;
 
-                case MDBS_HREG_RESERVED_34:
-                case MDBS_HREG_RESERVED_35:
+                case MDBS_HREG_SENS_TRIM_P0_OXGN_RAW_HI:
+                        *data   = sens.trim.point[ 0].oxgn_raw.u16[ 1];
+                        break;
+
+                case MDBS_HREG_SENS_TRIM_P0_OXGN_RAW_LO:
+                        *data   = sens.trim.point[ 0].oxgn_raw.u16[ 0];
+                        break;
+
                 case MDBS_HREG_RESERVED_36:
                 case MDBS_HREG_RESERVED_37:
                         *data   = 0;
@@ -295,23 +304,29 @@ mdbs_hreg_read(                         const   size_t                  idx,
 
 
                 case MDBS_HREG_SENS_TRIM_P1_TIMESTMP_HI:
-                        *data   = sens.trim.timestmp[ 1].u16[ 1];
+                        *data   = sens.trim.point[ 1].timestmp.u16[ 1];
                         break;
 
                 case MDBS_HREG_SENS_TRIM_P1_TIMESTMP_LO:
-                        *data   = sens.trim.timestmp[ 1].u16[ 0];
+                        *data   = sens.trim.point[ 1].timestmp.u16[ 0];
                         break;
 
                 case MDBS_HREG_SENS_TRIM_P1_OXGN_PPM_HI:
-                        *data   = sens.trim.oxgn_ppm[ 1].u16[ 1];
+                        *data   = sens.trim.point[ 1].oxgn_ppm.u16[ 1];
                         break;
 
                 case MDBS_HREG_SENS_TRIM_P1_OXGN_PPM_LO:
-                        *data   = sens.trim.oxgn_ppm[ 1].u16[ 0];
+                        *data   = sens.trim.point[ 1].oxgn_ppm.u16[ 0];
                         break;
 
-                case MDBS_HREG_RESERVED_3C:
-                case MDBS_HREG_RESERVED_3D:
+                case MDBS_HREG_SENS_TRIM_P1_OXGN_RAW_HI:
+                        *data   = sens.trim.point[ 1].oxgn_raw.u16[ 1];
+                        break;
+
+                case MDBS_HREG_SENS_TRIM_P1_OXGN_RAW_LO:
+                        *data   = sens.trim.point[ 1].oxgn_raw.u16[ 0];
+                        break;
+
                 case MDBS_HREG_RESERVED_3E:
                 case MDBS_HREG_RESERVED_3F:
                         *data   = 0;
@@ -411,48 +426,50 @@ mdbs_hreg_write(                        const   size_t                  idx,
 
                 case MDBS_HREG_SENS_OFST_RAW:
                         sens.oxgn.offset                = *data;
-                        sens_oxgn_ofst_set( sens.oxgn.offset );
+                        //sens_oxgn_ofst_set( sens.oxgn.offset );
                         sys_nvm_write16( SYS_NVM_ADDR_SENS_OFST_RAW, &sens.oxgn.offset, 1 );
                         break;
 
 
                 case MDBS_HREG_SENS_TRIM_P0_TIMESTMP_HI:
-                        sens.trim.timestmp[ 0].u16[ 1]  = *data;
+                        sens.trim.point[ 0].timestmp.u16[ 1]  = *data;
                         break;
 
                 case MDBS_HREG_SENS_TRIM_P0_TIMESTMP_LO:
-                        sens.trim.timestmp[ 0].u16[ 0]  = *data;
+                        sens.trim.point[ 0].timestmp.u16[ 0]  = *data;
                         break;
 
                 case MDBS_HREG_SENS_TRIM_P0_OXGN_PPM_HI:
-                        sens.trim.oxgn_ppm[ 0].u16[ 1]  = *data;
+                        sens.trim.point[ 0].oxgn_ppm.u16[ 1]  = *data;
                         break;
 
                 case MDBS_HREG_SENS_TRIM_P0_OXGN_PPM_LO:
-                        sens.trim.oxgn_ppm[ 0].u16[ 0]  = *data;
+                        sens.trim.point[ 0].oxgn_ppm.u16[ 0]  = *data;
 
-                        sens.trim.oxgn_raw[ 0].i32      = sens.oxgn.raw.i32;
-                        sens.trim.temp_raw[ 0].i32      = sens.temp.raw.i32;
-                        sens.trim.pres_raw[ 0].i32      = sens.pres.raw.i32;
+                        sens.trim.point[ 0].oxgn_raw.i32      = sens.oxgn.raw.i32;
+                        //sens.trim.temp_raw[ 0].i32      = sens.temp.raw.i32;
+                        sens.trim.point[ 0].temp_raw          = sens.temp.raw;
+                        sens.trim.point[ 0].pres_raw.i32      = sens.pres.raw.i32;
 
                         sens_trim_restore( &sens.trim, sens.temp.digc.f32 );
                         //sens_trim_restore( &sens.trim, 25 );
                         //sens_trim_p0_update( &sens.trim, sens.temp.digc.f32 );
 
-                        sys_nvm_write16( SYS_NVM_ADDR_TRIM_P0_TIMESTMP_HI, &sens.trim.timestmp[ 0].u16[ 1], 1 );
-                        sys_nvm_write16( SYS_NVM_ADDR_TRIM_P0_TIMESTMP_LO, &sens.trim.timestmp[ 0].u16[ 0], 1 );
-                        sys_nvm_write16( SYS_NVM_ADDR_TRIM_P0_OXGN_PPM_HI, &sens.trim.oxgn_ppm[ 0].u16[ 1], 1 );
-                        sys_nvm_write16( SYS_NVM_ADDR_TRIM_P0_OXGN_PPM_LO, &sens.trim.oxgn_ppm[ 0].u16[ 0], 1 );
-                        sys_nvm_write16( SYS_NVM_ADDR_TRIM_P0_OXGN_RAW_HI, &sens.trim.oxgn_raw[ 0].u16[ 1], 1 );
-                        sys_nvm_write16( SYS_NVM_ADDR_TRIM_P0_OXGN_RAW_LO, &sens.trim.oxgn_raw[ 0].u16[ 0], 1 );
-                        sys_nvm_write16( SYS_NVM_ADDR_TRIM_P0_TEMP_RAW_HI, &sens.trim.temp_raw[ 0].u16[ 1], 1 );
-                        sys_nvm_write16( SYS_NVM_ADDR_TRIM_P0_TEMP_RAW_LO, &sens.trim.temp_raw[ 0].u16[ 0], 1 );
-                        sys_nvm_write16( SYS_NVM_ADDR_TRIM_P0_PRES_RAW_HI, &sens.trim.pres_raw[ 0].u16[ 1], 1 );
-                        sys_nvm_write16( SYS_NVM_ADDR_TRIM_P0_PRES_RAW_LO, &sens.trim.pres_raw[ 0].u16[ 0], 1 );
+                        sys_nvm_write16( SYS_NVM_ADDR_TRIM_P0_TIMESTMP_HI, &sens.trim.point[ 0].timestmp.u16[ 1], 1 );
+                        sys_nvm_write16( SYS_NVM_ADDR_TRIM_P0_TIMESTMP_LO, &sens.trim.point[ 0].timestmp.u16[ 0], 1 );
+                        sys_nvm_write16( SYS_NVM_ADDR_TRIM_P0_OXGN_PPM_HI, &sens.trim.point[ 0].oxgn_ppm.u16[ 1], 1 );
+                        sys_nvm_write16( SYS_NVM_ADDR_TRIM_P0_OXGN_PPM_LO, &sens.trim.point[ 0].oxgn_ppm.u16[ 0], 1 );
+                        sys_nvm_write16( SYS_NVM_ADDR_TRIM_P0_OXGN_RAW_HI, &sens.trim.point[ 0].oxgn_raw.u16[ 1], 1 );
+                        sys_nvm_write16( SYS_NVM_ADDR_TRIM_P0_OXGN_RAW_LO, &sens.trim.point[ 0].oxgn_raw.u16[ 0], 1 );
+                        //sys_nvm_write16( SYS_NVM_ADDR_TRIM_P0_TEMP_RAW_HI, &sens.trim.temp_raw[ 0].u16[ 1], 1 );
+                        //sys_nvm_write16( SYS_NVM_ADDR_TRIM_P0_TEMP_RAW_LO, &sens.trim.temp_raw[ 0].u16[ 0], 1 );
+                        sys_nvm_write16( SYS_NVM_ADDR_TRIM_P0_TEMP_RAW_HI, (uint16_t *) &sens.trim.point[ 0].temp_raw, 1 );
+                        sys_nvm_write16( SYS_NVM_ADDR_TRIM_P0_PRES_RAW_HI, &sens.trim.point[ 0].pres_raw.u16[ 1], 1 );
+                        sys_nvm_write16( SYS_NVM_ADDR_TRIM_P0_PRES_RAW_LO, &sens.trim.point[ 0].pres_raw.u16[ 0], 1 );
                         break;
 
-                case MDBS_HREG_RESERVED_34:
-                case MDBS_HREG_RESERVED_35:
+                case MDBS_HREG_SENS_TRIM_P0_OXGN_RAW_HI:
+                case MDBS_HREG_SENS_TRIM_P0_OXGN_RAW_LO:
                 case MDBS_HREG_RESERVED_36:
                 case MDBS_HREG_RESERVED_37:
                         //address exist, read-only register, do nothing
@@ -460,42 +477,44 @@ mdbs_hreg_write(                        const   size_t                  idx,
 
 
                 case MDBS_HREG_SENS_TRIM_P1_TIMESTMP_HI:
-                        sens.trim.timestmp[ 1].u16[ 1]  = *data;
+                        sens.trim.point[ 1].timestmp.u16[ 1]  = *data;
                         break;
 
                 case MDBS_HREG_SENS_TRIM_P1_TIMESTMP_LO:
-                        sens.trim.timestmp[ 1].u16[ 0]  = *data;
+                        sens.trim.point[ 1].timestmp.u16[ 0]  = *data;
                         break;
 
                 case MDBS_HREG_SENS_TRIM_P1_OXGN_PPM_HI:
-                        sens.trim.oxgn_ppm[ 1].u16[ 1]  = *data;
+                        sens.trim.point[ 1].oxgn_ppm.u16[ 1]  = *data;
                         break;
 
                 case MDBS_HREG_SENS_TRIM_P1_OXGN_PPM_LO:
-                        sens.trim.oxgn_ppm[ 1].u16[ 0]  = *data;
+                        sens.trim.point[ 1].oxgn_ppm.u16[ 0]  = *data;
 
-                        sens.trim.oxgn_raw[ 1].i32      = sens.oxgn.raw.i32;
-                        sens.trim.temp_raw[ 1].i32      = sens.temp.raw.i32;
-                        sens.trim.pres_raw[ 1].i32      = sens.pres.raw.i32;
+                        sens.trim.point[ 1].oxgn_raw.i32      = sens.oxgn.raw.i32;
+                        //sens.trim.temp_raw[ 1].i32      = sens.temp.raw.i32;
+                        sens.trim.point[ 1].temp_raw          = sens.temp.raw;
+                        sens.trim.point[ 1].pres_raw.i32      = sens.pres.raw.i32;
 
                         sens_trim_restore( &sens.trim, sens.temp.digc.f32 );
                         //sens_trim_restore( &sens.trim, 25 );
 
-                        sys_nvm_write16( SYS_NVM_ADDR_TRIM_P1_TIMESTMP_HI, &sens.trim.timestmp[ 1].u16[ 1], 1 );
-                        sys_nvm_write16( SYS_NVM_ADDR_TRIM_P1_TIMESTMP_LO, &sens.trim.timestmp[ 1].u16[ 0], 1 );
-                        sys_nvm_write16( SYS_NVM_ADDR_TRIM_P1_OXGN_PPM_HI, &sens.trim.oxgn_ppm[ 1].u16[ 1], 1 );
-                        sys_nvm_write16( SYS_NVM_ADDR_TRIM_P1_OXGN_PPM_LO, &sens.trim.oxgn_ppm[ 1].u16[ 0], 1 );
-                        sys_nvm_write16( SYS_NVM_ADDR_TRIM_P1_OXGN_RAW_HI, &sens.trim.oxgn_raw[ 1].u16[ 1], 1 );
-                        sys_nvm_write16( SYS_NVM_ADDR_TRIM_P1_OXGN_RAW_LO, &sens.trim.oxgn_raw[ 1].u16[ 0], 1 );
-                        sys_nvm_write16( SYS_NVM_ADDR_TRIM_P1_TEMP_RAW_HI, &sens.trim.temp_raw[ 1].u16[ 1], 1 );
-                        sys_nvm_write16( SYS_NVM_ADDR_TRIM_P1_TEMP_RAW_LO, &sens.trim.temp_raw[ 1].u16[ 0], 1 );
-                        sys_nvm_write16( SYS_NVM_ADDR_TRIM_P1_PRES_RAW_HI, &sens.trim.pres_raw[ 1].u16[ 1], 1 );
-                        sys_nvm_write16( SYS_NVM_ADDR_TRIM_P1_PRES_RAW_LO, &sens.trim.pres_raw[ 1].u16[ 0], 1 );
+                        sys_nvm_write16( SYS_NVM_ADDR_TRIM_P1_TIMESTMP_HI, &sens.trim.point[ 1].timestmp.u16[ 1], 1 );
+                        sys_nvm_write16( SYS_NVM_ADDR_TRIM_P1_TIMESTMP_LO, &sens.trim.point[ 1].timestmp.u16[ 0], 1 );
+                        sys_nvm_write16( SYS_NVM_ADDR_TRIM_P1_OXGN_PPM_HI, &sens.trim.point[ 1].oxgn_ppm.u16[ 1], 1 );
+                        sys_nvm_write16( SYS_NVM_ADDR_TRIM_P1_OXGN_PPM_LO, &sens.trim.point[ 1].oxgn_ppm.u16[ 0], 1 );
+                        sys_nvm_write16( SYS_NVM_ADDR_TRIM_P1_OXGN_RAW_HI, &sens.trim.point[ 1].oxgn_raw.u16[ 1], 1 );
+                        sys_nvm_write16( SYS_NVM_ADDR_TRIM_P1_OXGN_RAW_LO, &sens.trim.point[ 1].oxgn_raw.u16[ 0], 1 );
+                        //sys_nvm_write16( SYS_NVM_ADDR_TRIM_P1_TEMP_RAW_HI, &sens.trim.temp_raw[ 1].u16[ 1], 1 );
+                        //sys_nvm_write16( SYS_NVM_ADDR_TRIM_P1_TEMP_RAW_LO, &sens.trim.temp_raw[ 1].u16[ 0], 1 );
+                        sys_nvm_write16( SYS_NVM_ADDR_TRIM_P1_TEMP_RAW_HI, (uint16_t *) &sens.trim.point[ 1].temp_raw, 1 );
+                        sys_nvm_write16( SYS_NVM_ADDR_TRIM_P1_PRES_RAW_HI, &sens.trim.point[ 1].pres_raw.u16[ 1], 1 );
+                        sys_nvm_write16( SYS_NVM_ADDR_TRIM_P1_PRES_RAW_LO, &sens.trim.point[ 1].pres_raw.u16[ 0], 1 );
 
                         break;
 
-                case MDBS_HREG_RESERVED_3C:
-                case MDBS_HREG_RESERVED_3D:
+                case MDBS_HREG_SENS_TRIM_P1_OXGN_RAW_HI:
+                case MDBS_HREG_SENS_TRIM_P1_OXGN_RAW_LO:
                 case MDBS_HREG_RESERVED_3E:
                 case MDBS_HREG_RESERVED_3F:
                         //address exist, read-only register, do nothing

@@ -23,14 +23,29 @@
 
 static  uint8_t         modbus_adu[ MDBS_RTU_ADU_SIZEOF ];
 //static  uint16_t        adc_raw[ OXGN_RAW_SIZEOF ];
-static  int32_t         avrg_buf[ AVERAGE_BUF_SIZEOF];
+static  uint32_t        oxgn_avrg_buf[ AVERAGE_BUF_SIZEOF ];
+//static  uint32_t        temp_avrg_buf[ AVERAGE_BUF_SIZEOF ];
+static  uint32_t        pres_avrg_buf[ AVERAGE_BUF_SIZEOF ];
+
 static  app_t           app;
+
         sens_t          sens    =
 {
-        .avrg.buf               = avrg_buf,
+        .avrg.buf               = oxgn_avrg_buf,
         .avrg.buf_sizeof        = AVERAGE_BUF_SIZEOF,
         .avrg.idx               = 0,
         .avrg.sum               = 0,
+
+        //.temp.avrg.buf          = temp_avrg_buf,
+        //.temp.avrg.buf_sizeof   = AVERAGE_BUF_SIZEOF,
+        //.temp.avrg.idx          = 0,
+        //.temp.avrg.sum          = 0,
+
+        .pres.avrg.buf          = pres_avrg_buf,
+        .pres.avrg.buf_sizeof   = AVERAGE_BUF_SIZEOF,
+        .pres.avrg.idx          = 0,
+        .pres.avrg.sum          = 0,
+
         .mcu.serial_num         = sys_serial_num,
         .mcu.device_id          = sys_device_id,
         .mcu.hardware_id        = sys_hardware_id,
@@ -148,27 +163,29 @@ app_nvm_restore()
 
         sys_nvm_read16( SYS_NVM_ADDR_SENS_OFST_RAW,             &sens.oxgn.offset,                      1 );
 
-        sys_nvm_read16( SYS_NVM_ADDR_TRIM_P0_TIMESTMP_HI,  &sens.trim.timestmp[ 0].u16[ 1],        1 );
-        sys_nvm_read16( SYS_NVM_ADDR_TRIM_P0_TIMESTMP_LO,  &sens.trim.timestmp[ 0].u16[ 0],        1 );
-        sys_nvm_read16( SYS_NVM_ADDR_TRIM_P0_OXGN_PPM_HI,  &sens.trim.oxgn_ppm[ 0].u16[ 1],        1 );
-        sys_nvm_read16( SYS_NVM_ADDR_TRIM_P0_OXGN_PPM_LO,  &sens.trim.oxgn_ppm[ 0].u16[ 0],        1 );
-        sys_nvm_read16( SYS_NVM_ADDR_TRIM_P0_OXGN_RAW_HI,  &sens.trim.oxgn_raw[ 0].u16[ 1],        1 );
-        sys_nvm_read16( SYS_NVM_ADDR_TRIM_P0_OXGN_RAW_LO,  &sens.trim.oxgn_raw[ 0].u16[ 0],        1 );
-        sys_nvm_read16( SYS_NVM_ADDR_TRIM_P0_TEMP_RAW_HI,  &sens.trim.temp_raw[ 0].u16[ 1],        1 );
-        sys_nvm_read16( SYS_NVM_ADDR_TRIM_P0_TEMP_RAW_LO,  &sens.trim.temp_raw[ 0].u16[ 0],        1 );
-        sys_nvm_read16( SYS_NVM_ADDR_TRIM_P0_PRES_RAW_HI,  &sens.trim.pres_raw[ 0].u16[ 1],        1 );
-        sys_nvm_read16( SYS_NVM_ADDR_TRIM_P0_PRES_RAW_LO,  &sens.trim.pres_raw[ 0].u16[ 0],        1 );
+        sys_nvm_read16( SYS_NVM_ADDR_TRIM_P0_TIMESTMP_HI,  &sens.trim.point[ 0].timestmp.u16[ 1],     1 );
+        sys_nvm_read16( SYS_NVM_ADDR_TRIM_P0_TIMESTMP_LO,  &sens.trim.point[ 0].timestmp.u16[ 0],     1 );
+        sys_nvm_read16( SYS_NVM_ADDR_TRIM_P0_OXGN_PPM_HI,  &sens.trim.point[ 0].oxgn_ppm.u16[ 1],     1 );
+        sys_nvm_read16( SYS_NVM_ADDR_TRIM_P0_OXGN_PPM_LO,  &sens.trim.point[ 0].oxgn_ppm.u16[ 0],     1 );
+        sys_nvm_read16( SYS_NVM_ADDR_TRIM_P0_OXGN_RAW_HI,  &sens.trim.point[ 0].oxgn_raw.u16[ 1],     1 );
+        sys_nvm_read16( SYS_NVM_ADDR_TRIM_P0_OXGN_RAW_LO,  &sens.trim.point[ 0].oxgn_raw.u16[ 0],     1 );
+        //sys_nvm_read16( SYS_NVM_ADDR_TRIM_P0_TEMP_RAW_HI,  &sens.trim.temp_raw[ 0].u16[ 1],        1 );
+        //sys_nvm_read16( SYS_NVM_ADDR_TRIM_P0_TEMP_RAW_LO,  &sens.trim.temp_raw[ 0].u16[ 0],        1 );
+        sys_nvm_read16( SYS_NVM_ADDR_TRIM_P0_TEMP_RAW_HI,  (uint16_t *) &sens.trim.point[ 0].temp_raw,             1 );
+        sys_nvm_read16( SYS_NVM_ADDR_TRIM_P0_PRES_RAW_HI,  &sens.trim.point[ 0].pres_raw.u16[ 1],     1 );
+        sys_nvm_read16( SYS_NVM_ADDR_TRIM_P0_PRES_RAW_LO,  &sens.trim.point[ 0].pres_raw.u16[ 0],     1 );
 
-        sys_nvm_read16( SYS_NVM_ADDR_TRIM_P1_TIMESTMP_HI,  &sens.trim.timestmp[ 1].u16[ 1],        1 );
-        sys_nvm_read16( SYS_NVM_ADDR_TRIM_P1_TIMESTMP_LO,  &sens.trim.timestmp[ 1].u16[ 0],        1 );
-        sys_nvm_read16( SYS_NVM_ADDR_TRIM_P1_OXGN_PPM_HI,  &sens.trim.oxgn_ppm[ 1].u16[ 1],        1 );
-        sys_nvm_read16( SYS_NVM_ADDR_TRIM_P1_OXGN_PPM_LO,  &sens.trim.oxgn_ppm[ 1].u16[ 0],        1 );
-        sys_nvm_read16( SYS_NVM_ADDR_TRIM_P1_OXGN_RAW_HI,  &sens.trim.oxgn_raw[ 1].u16[ 1],        1 );
-        sys_nvm_read16( SYS_NVM_ADDR_TRIM_P1_OXGN_RAW_LO,  &sens.trim.oxgn_raw[ 1].u16[ 0],        1 );
-        sys_nvm_read16( SYS_NVM_ADDR_TRIM_P1_TEMP_RAW_HI,  &sens.trim.temp_raw[ 1].u16[ 1],        1 );
-        sys_nvm_read16( SYS_NVM_ADDR_TRIM_P1_TEMP_RAW_LO,  &sens.trim.temp_raw[ 1].u16[ 0],        1 );
-        sys_nvm_read16( SYS_NVM_ADDR_TRIM_P1_PRES_RAW_HI,  &sens.trim.pres_raw[ 1].u16[ 1],        1 );
-        sys_nvm_read16( SYS_NVM_ADDR_TRIM_P1_PRES_RAW_LO,  &sens.trim.pres_raw[ 1].u16[ 0],        1 );
+        sys_nvm_read16( SYS_NVM_ADDR_TRIM_P1_TIMESTMP_HI,  &sens.trim.point[ 1].timestmp.u16[ 1],     1 );
+        sys_nvm_read16( SYS_NVM_ADDR_TRIM_P1_TIMESTMP_LO,  &sens.trim.point[ 1].timestmp.u16[ 0],     1 );
+        sys_nvm_read16( SYS_NVM_ADDR_TRIM_P1_OXGN_PPM_HI,  &sens.trim.point[ 1].oxgn_ppm.u16[ 1],     1 );
+        sys_nvm_read16( SYS_NVM_ADDR_TRIM_P1_OXGN_PPM_LO,  &sens.trim.point[ 1].oxgn_ppm.u16[ 0],     1 );
+        sys_nvm_read16( SYS_NVM_ADDR_TRIM_P1_OXGN_RAW_HI,  &sens.trim.point[ 1].oxgn_raw.u16[ 1],     1 );
+        sys_nvm_read16( SYS_NVM_ADDR_TRIM_P1_OXGN_RAW_LO,  &sens.trim.point[ 1].oxgn_raw.u16[ 0],     1 );
+        //sys_nvm_read16( SYS_NVM_ADDR_TRIM_P1_TEMP_RAW_HI,  &sens.trim.temp_raw[ 1].u16[ 1],     1 );
+        //sys_nvm_read16( SYS_NVM_ADDR_TRIM_P1_TEMP_RAW_LO,  &sens.trim.temp_raw[ 1].u16[ 0],     1 );
+        sys_nvm_read16( SYS_NVM_ADDR_TRIM_P1_TEMP_RAW_HI,  (uint16_t *) &sens.trim.point[ 1].temp_raw,             1 );
+        sys_nvm_read16( SYS_NVM_ADDR_TRIM_P1_PRES_RAW_HI,  &sens.trim.point[ 1].pres_raw.u16[ 1],     1 );
+        sys_nvm_read16( SYS_NVM_ADDR_TRIM_P1_PRES_RAW_LO,  &sens.trim.point[ 1].pres_raw.u16[ 0],     1 );
 }
 
 
@@ -287,12 +304,12 @@ int main( void )
                         app.evt.sens            =   false;
 
                         oxgn_raw                = ad7799_read_single();
-                        sens.oxgn.raw.i32       = sens_oxgn_raw_avrg( &sens.avrg, oxgn_raw );
-                        sens.temp.raw.i32       = 0xFFFF & lps25_get_temperature_raw();
-                        sens.pres.raw.i32       = lps25_get_pressure_raw();
+                        sens.oxgn.raw.u32       = sens_oxgn_raw_avrg( &sens.avrg, oxgn_raw );
+                        sens.temp.raw           = lps25_get_temperature_raw();
+                        sens.pres.raw.u32       = lps25_get_pressure_raw();
 
                         sens.pres.hPa.f32       = lps25_pressure_raw_to_hpa( sens.pres.raw.i32 );
-                        sens.temp.digc.f32      = lps25_temperature_raw_to_digc( sens.temp.raw.i32 );
+                        sens.temp.digc.f32      = lps25_temperature_raw_to_digc( sens.temp.raw );
 
                         sens.oxgn.ppm.i32       = sens_oxgn_raw_to_ppm( &sens );
                         //sens.oxgn.ppm.i32       = sens_oxgn_avrg_to_ppm( &sens.trim, sens.avrg.sum, sens.avrg.buf_sizeof, sens.temp.digc.f32 );

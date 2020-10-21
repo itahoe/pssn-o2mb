@@ -83,9 +83,9 @@ sens_oxgn_stream_run(                   const   uint16_t *      data,
   * @param  None
   * @retval None
   */
-int32_t
+uint32_t
 sens_oxgn_raw_avrg(                             sens_avrg_t *           p,
-                                                int32_t                 sample )
+                                                uint32_t                sample )
 {
         p->sum                  -= p->buf[ p->idx ];
         p->sum                  += sample;
