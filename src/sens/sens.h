@@ -156,7 +156,7 @@ sens_oxgn_avrg_to_ppm(                  const   sens_trim_t *   p,
                                         const   float           t_cels );
 */
 
-uint32_t
+int32_t
 sens_oxgn_raw_to_ppm(                   const   sens_t *        p );
 
 uint32_t

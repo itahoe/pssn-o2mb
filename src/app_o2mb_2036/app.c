@@ -17,6 +17,8 @@
 #include "app.h"
 
 
+float   sens_get_k_temp_digc( const float );
+
 //#define OXGN_RAW_SIZEOF                 2
 #define AVERAGE_BUF_SIZEOF              8
 
@@ -208,7 +210,8 @@ HAL_ADC_ConvCpltCallback(                       ADC_HandleTypeDef *     hadc )
 int main( void )
 {
         size_t          len;
-        int32_t         oxgn_raw;
+        //int32_t         oxgn_raw;
+
 
         HAL_Init();
 
@@ -230,8 +233,10 @@ int main( void )
         ad7799_set_burnout(     false                           );
         ad7799_set_unipolar(    true                            );
         ad7799_set_buffered(    true                            );
-        ad7799_set_gain(        AD7799_GAIN_1                   );
+        //ad7799_set_gain(        AD7799_GAIN_1                   );
+        ad7799_set_gain(        AD7799_GAIN_2                   );
         //ad7799_set_gain(        AD7799_GAIN_4                   );
+        //ad7799_set_gain(        AD7799_GAIN_32                   );
         ad7799_set_refdet(      false                           );
 
         //ad7799_set_pwr_swtch(   false                           );
@@ -285,7 +290,12 @@ int main( void )
                         }
 
                         sys_ser1_recv( modbus_adu, MDBS_RTU_ADU_SIZEOF );
-                } //ser1_recv
+
+                        //APP_TRACE( "RAW: %08X\tPPM: %d\tTG: %f\tOFST: %f\n", sens.oxgn.raw.u32, sens.oxgn.ppm.u32, sens.trim.tg, sens.trim.ofst );
+                        //APP_TRACE( "RAW: %08X\tPPM: %d\tkT: %f\n", sens.oxgn.raw.u32, sens.oxgn.ppm.u32, sens_get_k_temp_digc( sens.temp.digc.f32 ) );
+                        //APP_TRACE( "RAW: %08X\tPPM: %d\tt: %f\n", sens.oxgn.raw.u32, sens.oxgn.ppm.u32, sens.temp.digc.f32 );
+
+               } //ser1_recv
 
                 if( app.evt.adc )
                 {
@@ -303,14 +313,11 @@ int main( void )
                 {
                         app.evt.sens            =   false;
 
-                        oxgn_raw                = ad7799_read_single();
-                        sens.oxgn.raw.u32       = sens_oxgn_raw_avrg( &sens.avrg, oxgn_raw );
-                        sens.temp.raw           = lps25_get_temperature_raw();
                         sens.pres.raw.u32       = lps25_get_pressure_raw();
-
                         sens.pres.hPa.f32       = lps25_pressure_raw_to_hpa( sens.pres.raw.i32 );
+                        sens.temp.raw           = lps25_get_temperature_raw();
                         sens.temp.digc.f32      = lps25_temperature_raw_to_digc( sens.temp.raw );
-
+                        sens.oxgn.raw.u32       = sens_oxgn_raw_avrg( &sens.avrg, ad7799_read_single() );
                         sens.oxgn.ppm.i32       = sens_oxgn_raw_to_ppm( &sens );
                         //sens.oxgn.ppm.i32       = sens_oxgn_avrg_to_ppm( &sens.trim, sens.avrg.sum, sens.avrg.buf_sizeof, sens.temp.digc.f32 );
 

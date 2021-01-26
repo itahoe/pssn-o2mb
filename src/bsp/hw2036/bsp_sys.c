@@ -60,14 +60,16 @@ bsp_sys_device_id(                              const   size_t          idx  )
 uint16_t
 bsp_sys_hardware_id(                            const   size_t          idx  )
 {
-        const   uint8_t         id[]  = { '2', '0', '2', '6', };
+        const   uint8_t         id[]  = { '2', '0', '3', '6', };
 
         switch( idx )
         {
-                case 0:         return( (id[ 0] <<  8) | (id[ 1] & 0xFF) );
-                case 1:         return( (id[ 2] <<  8) | (id[ 3] & 0xFF) );
+                //case 0:         return( (id[ 0] <<  8) | (id[ 1] & 0xFF) );
+                //case 1:         return( (id[ 2] <<  8) | (id[ 3] & 0xFF) );
+                case 0:         return( (id[ 1] <<  8) | (id[ 0] & 0xFF) );
+                case 1:         return( (id[ 3] <<  8) | (id[ 2] & 0xFF) );
                 default:
-                        return( 0x0000);
+                        return( 0x0000 );
         }
 }
 
@@ -116,12 +118,19 @@ bsp_sys_firmware_id(                            const   size_t          idx  )
         } ver;
 
 
-        ver.u08[ 0]     = YEAR_H;
-        ver.u08[ 1]     = YEAR_L;
-        ver.u08[ 2]     = MONTH_H;
-        ver.u08[ 3]     = MONTH_L;
-        ver.u08[ 4]     = DAY_H;
-        ver.u08[ 5]     = DAY_L;
+        //ver.u08[ 0]     = YEAR_H;
+        //ver.u08[ 1]     = YEAR_L;
+        //ver.u08[ 2]     = MONTH_H;
+        //ver.u08[ 3]     = MONTH_L;
+        //ver.u08[ 4]     = DAY_H;
+        //ver.u08[ 5]     = DAY_L;
+
+        ver.u08[ 0]     = YEAR_L;
+        ver.u08[ 1]     = YEAR_H;
+        ver.u08[ 2]     = MONTH_L;
+        ver.u08[ 3]     = MONTH_H;
+        ver.u08[ 4]     = DAY_L;
+        ver.u08[ 5]     = DAY_H;
 
         if( idx < 3 )
         {
