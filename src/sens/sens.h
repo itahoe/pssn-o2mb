@@ -62,6 +62,9 @@ typedef struct  sens_oxgn_s
         sens_union_t            raw;
         sens_union_t            ppm;
         uint16_t                offset;
+        sens_union_t            fv;
+        sens_union_t            ft;
+        sens_union_t            fp;
 } sens_oxgn_t;
 
 
@@ -156,8 +159,8 @@ sens_oxgn_avrg_to_ppm(                  const   sens_trim_t *   p,
                                         const   float           t_cels );
 */
 
-int32_t
-sens_oxgn_raw_to_ppm(                   const   sens_t *        p );
+float
+sens_oxgn_raw_to_ppm(                           sens_t *        p );
 
 uint32_t
 sens_oxgn_raw_avrg(                             sens_avrg_t *   p,

@@ -318,7 +318,8 @@ int main( void )
                         sens.temp.raw           = lps25_get_temperature_raw();
                         sens.temp.digc.f32      = lps25_temperature_raw_to_digc( sens.temp.raw );
                         sens.oxgn.raw.u32       = sens_oxgn_raw_avrg( &sens.avrg, ad7799_read_single() );
-                        sens.oxgn.ppm.i32       = sens_oxgn_raw_to_ppm( &sens );
+                        //sens.oxgn.ppm.i32       = sens_oxgn_raw_to_ppm( &sens );
+                        sens.oxgn.ppm.f32       = sens_oxgn_raw_to_ppm( &sens );
                         //sens.oxgn.ppm.i32       = sens_oxgn_avrg_to_ppm( &sens.trim, sens.avrg.sum, sens.avrg.buf_sizeof, sens.temp.digc.f32 );
 
                         sens.avrg.slope         = sens_oxgn_get_slope( &sens.avrg, sens.oxgn.raw.i32 );

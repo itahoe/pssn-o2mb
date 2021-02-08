@@ -134,10 +134,10 @@ sens_oxgn_raw_to_ppm(                   const   sens_t *        p )
 }
 */
 
-int32_t
-sens_oxgn_raw_to_ppm(                   const   sens_t *        p )
+float
+sens_oxgn_raw_to_ppm(                           sens_t *        p )
 {
-        const   sens_oxgn_t *   oxgn            = &( p->oxgn );
+                sens_oxgn_t *   oxgn            = &( p->oxgn );
         const   sens_temp_t *   temp            = &( p->temp );
         const   sens_pres_t *   pres            = &( p->pres );
         const   sens_trim_t *   trim            = &( p->trim );
@@ -150,20 +150,21 @@ sens_oxgn_raw_to_ppm(                   const   sens_t *        p )
                 float           k_pres_cal      = trim->point[ 1].pres_raw.i32;
                 float           k_pres_meas     = pres->raw.i32;
 
-                float           fv, ft, fp;
+                //float           fv, ft, fp;
                 float           ppm;
 
 
-        fv      = a * x + b;
-        ft      = k_temp_cal / k_temp_meas;
-        fp      = k_pres_cal / k_pres_meas;
-        ppm     = fv * ft * fp;
+        oxgn->fv.f32    = a * x + b;
+        oxgn->ft.f32    = k_temp_cal / k_temp_meas;
+        oxgn->fp.f32    = k_pres_cal / k_pres_meas;
+        ppm             = oxgn->fv.f32 * oxgn->ft.f32 * oxgn->fp.f32;
 
         //APP_TRACE( "fv: %8.4f\tft: %8.4f\tfp: %8.4f\tPPM: %8.4f\n", fv, ft, fp, fv*ft*fp );
         //APP_TRACE( "fv: %8.4f\tft: %8.4f\tfp: %8.4f\tPPM: %8.4f\tRAW: %16d\n", fv, ft, fp, ppm, oxgn->raw.i32 );
 
 
-        return( (int32_t) (ppm + 0.5) );
+        //return( (int32_t) (ppm + 0.5) );
+        return( ppm );
 }
 
 
