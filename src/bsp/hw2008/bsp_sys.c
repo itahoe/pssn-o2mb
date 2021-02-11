@@ -14,12 +14,13 @@
 /**
  * @brief       Reset System
  */
+/*
 void
 bsp_sys_reset( void )
 {
         NVIC_SystemReset();
 }
-
+*/
 
 /*******************************************************************************
 * SYS ID
@@ -57,6 +58,7 @@ bsp_sys_device_id(                              const   size_t          idx  )
 /**
  * @brief       Get Hardware ID
  */
+/*
 uint16_t
 bsp_sys_hardware_id(                            const   size_t          idx  )
 {
@@ -70,7 +72,7 @@ bsp_sys_hardware_id(                            const   size_t          idx  )
                         return( 0x0000);
         }
 }
-
+*/
 
 /*******************************************************************************
 * SYS FIRMWARE

@@ -6,7 +6,7 @@
 
 
 #include "sys.h"
-#include "bsp.h"
+#include "stm32.h"
 
 
 /*******************************************************************************
@@ -22,7 +22,7 @@ sys_nvm_init( void )
 {
         HAL_FLASH_Unlock();
 
-        bsp_nvm_init();
+        stm32_nvm_init();
 
         HAL_FLASH_Lock();
 }
@@ -40,7 +40,7 @@ sys_nvm_read16(                                 sys_nvm_addr_t  addr,
 {
         for( size_t i = 0; i < len; i++ )
         {
-                bsp_nvm_read16( addr + i, data + i );
+                stm32_nvm_read16( addr + i, data + i );
         }
 }
 
@@ -59,7 +59,7 @@ sys_nvm_write16(                                sys_nvm_addr_t  addr,
 
         for( size_t i = 0; i < len; i++ )
         {
-                bsp_nvm_write16( addr + i, *(data + i) );
+                stm32_nvm_write16( addr + i, *(data + i) );
         }
 
         HAL_FLASH_Lock();

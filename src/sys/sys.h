@@ -24,8 +24,10 @@ typedef enum    sys_nvm_addr_e
         SYS_NVM_ADDR_TRIM_P0_OXGN_PPM_LO,
         SYS_NVM_ADDR_TRIM_P0_OXGN_RAW_HI,
         SYS_NVM_ADDR_TRIM_P0_OXGN_RAW_LO,
-        SYS_NVM_ADDR_TRIM_P0_TEMP_RAW_HI,
-        SYS_NVM_ADDR_TRIM_P0_TEMP_RAW_LO,
+        //SYS_NVM_ADDR_TRIM_P0_TEMP_RAW_HI,
+        //SYS_NVM_ADDR_TRIM_P0_TEMP_RAW_LO,
+        SYS_NVM_ADDR_TRIM_P0_TEMP_DIGC_HI,
+        SYS_NVM_ADDR_TRIM_P0_TEMP_DIGC_LO,
         SYS_NVM_ADDR_TRIM_P0_PRES_RAW_HI,
         SYS_NVM_ADDR_TRIM_P0_PRES_RAW_LO,
         SYS_NVM_ADDR_18,
@@ -37,8 +39,10 @@ typedef enum    sys_nvm_addr_e
         SYS_NVM_ADDR_TRIM_P1_OXGN_PPM_LO,
         SYS_NVM_ADDR_TRIM_P1_OXGN_RAW_HI,
         SYS_NVM_ADDR_TRIM_P1_OXGN_RAW_LO,
-        SYS_NVM_ADDR_TRIM_P1_TEMP_RAW_HI,
-        SYS_NVM_ADDR_TRIM_P1_TEMP_RAW_LO,
+        //SYS_NVM_ADDR_TRIM_P1_TEMP_RAW_HI,
+        //SYS_NVM_ADDR_TRIM_P1_TEMP_RAW_LO,
+        SYS_NVM_ADDR_TRIM_P1_TEMP_DIGC_HI,
+        SYS_NVM_ADDR_TRIM_P1_TEMP_DIGC_LO,
         SYS_NVM_ADDR_TRIM_P1_PRES_RAW_HI,
         SYS_NVM_ADDR_TRIM_P1_PRES_RAW_LO,
         SYS_NVM_ADDR_30,
@@ -96,6 +100,7 @@ sys_nvm_write16(                                sys_nvm_addr_t  addr,
 /*******************************************************************************
 * SYS SERIAL PORT
 *******************************************************************************/
+/*
 void
 sys_ser1_init(                          const   size_t          baudrate );
 
@@ -108,6 +113,6 @@ sys_ser1_recv(                                  uint8_t *       data,
 void
 sys_ser1_xmit(                                  uint8_t *       data,
                                         const   size_t          len );
-
+*/
 
 #endif //SYS_H

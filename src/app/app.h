@@ -14,6 +14,9 @@
 *******************************************************************************/
 #define SENS_CAL_NUM_POINTS             2
 
+#define	UI_LED_FLSH_SHRT_TCKS   ( ((size_t) CFG_UI_LED_FLSH_SHRT_mSEC * STM32_SYSTICK_HZ) / 1000 )
+#define	UI_LED_FLSH_LONG_TCKS   ( ((size_t) CFG_UI_LED_FLSH_LONG_mSEC * STM32_SYSTICK_HZ) / 1000 )
+
 
 typedef union
 {
@@ -21,23 +24,6 @@ typedef union
         uint32_t                u32;
         uint16_t                u16[ 2];
 } app_union_t;
-
-typedef struct  app_evt_s
-{
-        bool                    ser1_recv;
-        //bool                    lm75;
-        bool                    tick_1hz;
-        bool                    adc;
-        bool                    sens;
-} app_evt_t;
-
-
-typedef struct  app_s
-{
-        app_evt_t               evt;
-        size_t                  tick_1sec;
-} app_t;
-
 
 /*******************************************************************************
 *

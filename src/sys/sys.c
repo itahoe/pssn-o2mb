@@ -38,12 +38,13 @@ sys_device_id(                                  const   size_t          idx )
   * @param  None
   * @retval None
   */
+/*
 uint16_t
 sys_hardware_id(                                const   size_t          idx )
 {
         return( bsp_sys_hardware_id( idx ) );
 }
-
+*/
 
 /**
   * @brief  
