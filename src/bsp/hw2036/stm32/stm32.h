@@ -26,17 +26,11 @@
 #define STM32_NVIC_PRIO_USART1_DMA_RX           STM32_NVIC_PRIO_GENERIC
 #define STM32_NVIC_PRIO_USART1_DMA_TX           STM32_NVIC_PRIO_GENERIC
 
-//#define STM32_NVIC_PRIO_USART2                  STM32_NVIC_PRIO_GENERIC
-//#define STM32_NVIC_PRIO_USART2_DMA_RX           STM32_NVIC_PRIO_GENERIC
-//#define STM32_NVIC_PRIO_USART2_DMA_TX           STM32_NVIC_PRIO_GENERIC
-
-
-
 #define STM32_NVIC_PRIO_TIM3                    STM32_NVIC_PRIO_GENERIC
 
-#define STM32_NVIC_PRIO_UART7                   5
-#define STM32_NVIC_PRIO_UART7_DMA_RX            5
-#define STM32_NVIC_PRIO_UART7_DMA_TX            5
+//#define STM32_NVIC_PRIO_UART7                   5
+//#define STM32_NVIC_PRIO_UART7_DMA_RX            5
+//#define STM32_NVIC_PRIO_UART7_DMA_TX            5
 
 
 /*******************************************************************************
@@ -180,6 +174,7 @@ void    stm32_usart2_dma_tx_isr( void );
 /*******************************************************************************
 * UART4
 *******************************************************************************/
+/*
 int     stm32_uart4_deinit( void );
 int     stm32_uart4_init( void );
 void    stm32_uart4_config_baudrate( const size_t );
@@ -194,12 +189,13 @@ void    stm32_uart4_dma_rx_isr( void );
 
 uint32_t stm32_uart4_dma_tx_get_ndtr( void );
 void    stm32_uart4_dma_tx_isr( void );
-
+*/
 
 
 /*******************************************************************************
 * UART7
 *******************************************************************************/
+/*
 void    stm32_uart7_deinit( void );
 int     stm32_uart7_init( void );
 void    stm32_uart7_config_baudrate( const size_t );
@@ -213,6 +209,6 @@ void    stm32_uart7_dma_rx_isr( void );
 
 uint32_t stm32_uart7_dma_tx_get_ndtr( void );
 void    stm32_uart7_dma_tx_isr( void );
-
+*/
 
 #endif	//STM32_H

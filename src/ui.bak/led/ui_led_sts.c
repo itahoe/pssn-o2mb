@@ -8,8 +8,8 @@
 #include	"ui_led.h"
 
 
-	ui_led_t        ui_led_sts      =   {   .tick           =   0,
-	                                        .set            =   stm32_led_sts_set,
+        ui_led_t        ui_led_sts      =   {   .tick           =   0,
+                                                .set            =   stm32_led_sts_set,
                                                 .get            =   stm32_led_sts_get };
 
 

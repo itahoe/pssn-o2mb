@@ -1,12 +1,12 @@
 /**
-  * @file    sys_nvm.c
+  * @file    nvm.c
   * @brief   Non-Volatile Memory
   * @author  Igor T. <research.tahoe@gmail.com>
   */
 
 
-#include "sys.h"
 #include "stm32.h"
+#include "nvm.h"
 
 
 /*******************************************************************************
@@ -18,7 +18,7 @@
   * @retval None
   */
 void
-sys_nvm_init( void )
+nvm_init( void )
 {
         HAL_FLASH_Unlock();
 
@@ -34,7 +34,7 @@ sys_nvm_init( void )
   * @retval None
   */
 void
-sys_nvm_read16(                                 sys_nvm_addr_t  addr,
+nvm_read16(                                     nvm_addr_t  addr,
                                                 uint16_t *      data,
                                         const   size_t          len )
 {
@@ -51,7 +51,7 @@ sys_nvm_read16(                                 sys_nvm_addr_t  addr,
   * @retval None
   */
 void
-sys_nvm_write16(                                sys_nvm_addr_t  addr,
+nvm_write16(                                    nvm_addr_t  addr,
                                                 uint16_t *      data,
                                         const   size_t          len )
 {

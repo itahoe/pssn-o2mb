@@ -6,13 +6,14 @@
 
 
 #include <time.h>
+#include "app.h"
 #include "mdbs.h"
 #include "stm32.h"
 #include "sys.h"
 #include "sens.h"
 #include "ad7799.h"
 #include "lps25.h"
-#include "app.h"
+#include "nvm.h"
 
 
 /*******************************************************************************
@@ -36,7 +37,7 @@ typedef struct  app_s
 /*******************************************************************************
 * PRIVATE DEFINES
 *******************************************************************************/
-#define AVERAGE_BUF_SIZEOF              8
+#define AVERAGE_BUF_SIZEOF              32
 #define ADC_RAW_SIZEOF                  2
 
 
@@ -71,42 +72,42 @@ static  app_t           app;
         .mcu.firmware_id        = sys_firmware_id,
 };
 
-        uint16_t                VirtAddVarTab[ SYS_NVM_ADDR_MAX ]  =
+        uint16_t                VirtAddVarTab[ NVM_ADDR_MAX ]  =
 {
-        SYS_NVM_ADDR_STARTS_COUNT,
-        SYS_NVM_ADDR_SENS_OFST_RAW,
-        SYS_NVM_ADDR_02,
-        SYS_NVM_ADDR_03,
-        SYS_NVM_ADDR_04,
-        SYS_NVM_ADDR_05,
-        SYS_NVM_ADDR_06,
-        SYS_NVM_ADDR_07,
+        NVM_ADDR_STARTS_COUNT,
+        NVM_ADDR_SENS_OFST_RAW,
+        NVM_ADDR_02,
+        NVM_ADDR_03,
+        NVM_ADDR_04,
+        NVM_ADDR_05,
+        NVM_ADDR_06,
+        NVM_ADDR_07,
 
-        SYS_NVM_ADDR_TRIM_P0_TIMESTMP_LO,
-        SYS_NVM_ADDR_TRIM_P0_TIMESTMP_HI,
-        SYS_NVM_ADDR_TRIM_P0_OXGN_PPM_LO,
-        SYS_NVM_ADDR_TRIM_P0_OXGN_PPM_HI,
-        SYS_NVM_ADDR_TRIM_P0_OXGN_RAW_LO,
-        SYS_NVM_ADDR_TRIM_P0_OXGN_RAW_HI,
-        SYS_NVM_ADDR_TRIM_P0_TEMP_DIGC_LO,
-        SYS_NVM_ADDR_TRIM_P0_TEMP_DIGC_HI,
-        SYS_NVM_ADDR_TRIM_P0_PRES_RAW_LO,
-        SYS_NVM_ADDR_TRIM_P0_PRES_RAW_HI,
-        SYS_NVM_ADDR_18,
-        SYS_NVM_ADDR_19,
+        NVM_ADDR_TRIM_P0_TIMESTMP_LO,
+        NVM_ADDR_TRIM_P0_TIMESTMP_HI,
+        NVM_ADDR_TRIM_P0_OXGN_PPM_LO,
+        NVM_ADDR_TRIM_P0_OXGN_PPM_HI,
+        NVM_ADDR_TRIM_P0_OXGN_RAW_LO,
+        NVM_ADDR_TRIM_P0_OXGN_RAW_HI,
+        NVM_ADDR_TRIM_P0_TEMP_DIGC_LO,
+        NVM_ADDR_TRIM_P0_TEMP_DIGC_HI,
+        NVM_ADDR_TRIM_P0_PRES_RAW_LO,
+        NVM_ADDR_TRIM_P0_PRES_RAW_HI,
+        NVM_ADDR_18,
+        NVM_ADDR_19,
 
-        SYS_NVM_ADDR_TRIM_P1_TIMESTMP_LO,
-        SYS_NVM_ADDR_TRIM_P1_TIMESTMP_HI,
-        SYS_NVM_ADDR_TRIM_P1_OXGN_PPM_LO,
-        SYS_NVM_ADDR_TRIM_P1_OXGN_PPM_HI,
-        SYS_NVM_ADDR_TRIM_P1_OXGN_RAW_LO,
-        SYS_NVM_ADDR_TRIM_P1_OXGN_RAW_HI,
-        SYS_NVM_ADDR_TRIM_P1_TEMP_DIGC_LO,
-        SYS_NVM_ADDR_TRIM_P1_TEMP_DIGC_HI,
-        SYS_NVM_ADDR_TRIM_P1_PRES_RAW_LO,
-        SYS_NVM_ADDR_TRIM_P1_PRES_RAW_HI,
-        SYS_NVM_ADDR_30,
-        SYS_NVM_ADDR_31,
+        NVM_ADDR_TRIM_P1_TIMESTMP_LO,
+        NVM_ADDR_TRIM_P1_TIMESTMP_HI,
+        NVM_ADDR_TRIM_P1_OXGN_PPM_LO,
+        NVM_ADDR_TRIM_P1_OXGN_PPM_HI,
+        NVM_ADDR_TRIM_P1_OXGN_RAW_LO,
+        NVM_ADDR_TRIM_P1_OXGN_RAW_HI,
+        NVM_ADDR_TRIM_P1_TEMP_DIGC_LO,
+        NVM_ADDR_TRIM_P1_TEMP_DIGC_HI,
+        NVM_ADDR_TRIM_P1_PRES_RAW_LO,
+        NVM_ADDR_TRIM_P1_PRES_RAW_HI,
+        NVM_ADDR_30,
+        NVM_ADDR_31,
 };
 
 
@@ -122,41 +123,41 @@ static
 void
 app_nvm_restore()
 {
-        sys_nvm_read16( SYS_NVM_ADDR_STARTS_COUNT,              &sens.mcu.starts_cnt,                   1 );
+        nvm_read16( NVM_ADDR_STARTS_COUNT,              &sens.mcu.starts_cnt,                   1 );
         sens.mcu.starts_cnt++;
-        sys_nvm_write16( SYS_NVM_ADDR_STARTS_COUNT,             &sens.mcu.starts_cnt,                   1 );
+        nvm_write16( NVM_ADDR_STARTS_COUNT,             &sens.mcu.starts_cnt,                   1 );
 
-        sys_nvm_read16( SYS_NVM_ADDR_SENS_OFST_RAW,             &sens.oxgn.offset,                      1 );
+        nvm_read16( NVM_ADDR_SENS_OFST_RAW,             &sens.oxgn.offset,                      1 );
 
-        sys_nvm_read16( SYS_NVM_ADDR_TRIM_P0_TIMESTMP_HI,  &sens.trim.point[ 0].timestmp.u16[ 1],     1 );
-        sys_nvm_read16( SYS_NVM_ADDR_TRIM_P0_TIMESTMP_LO,  &sens.trim.point[ 0].timestmp.u16[ 0],     1 );
-        sys_nvm_read16( SYS_NVM_ADDR_TRIM_P0_OXGN_PPM_HI,  &sens.trim.point[ 0].oxgn_ppm.u16[ 1],     1 );
-        sys_nvm_read16( SYS_NVM_ADDR_TRIM_P0_OXGN_PPM_LO,  &sens.trim.point[ 0].oxgn_ppm.u16[ 0],     1 );
-        sys_nvm_read16( SYS_NVM_ADDR_TRIM_P0_OXGN_RAW_HI,  &sens.trim.point[ 0].oxgn_raw.u16[ 1],     1 );
-        sys_nvm_read16( SYS_NVM_ADDR_TRIM_P0_OXGN_RAW_LO,  &sens.trim.point[ 0].oxgn_raw.u16[ 0],     1 );
+        nvm_read16( NVM_ADDR_TRIM_P0_TIMESTMP_HI,  &sens.trim.point[ 0].timestmp.u16[ 1],     1 );
+        nvm_read16( NVM_ADDR_TRIM_P0_TIMESTMP_LO,  &sens.trim.point[ 0].timestmp.u16[ 0],     1 );
+        nvm_read16( NVM_ADDR_TRIM_P0_OXGN_PPM_HI,  &sens.trim.point[ 0].oxgn_ppm.u16[ 1],     1 );
+        nvm_read16( NVM_ADDR_TRIM_P0_OXGN_PPM_LO,  &sens.trim.point[ 0].oxgn_ppm.u16[ 0],     1 );
+        nvm_read16( NVM_ADDR_TRIM_P0_OXGN_RAW_HI,  &sens.trim.point[ 0].oxgn_raw.u16[ 1],     1 );
+        nvm_read16( NVM_ADDR_TRIM_P0_OXGN_RAW_LO,  &sens.trim.point[ 0].oxgn_raw.u16[ 0],     1 );
 
-        //sys_nvm_read16( SYS_NVM_ADDR_TRIM_P0_TEMP_RAW_HI,  &sens.trim.temp_raw[ 0].u16[ 1],        1 );
-        //sys_nvm_read16( SYS_NVM_ADDR_TRIM_P0_TEMP_RAW_LO,  &sens.trim.temp_raw[ 0].u16[ 0],        1 );
-        sys_nvm_read16( SYS_NVM_ADDR_TRIM_P0_TEMP_DIGC_HI, &sens.trim.point[ 0].temp_digc.u16[ 1], 1 );
-        sys_nvm_read16( SYS_NVM_ADDR_TRIM_P0_TEMP_DIGC_LO, &sens.trim.point[ 0].temp_digc.u16[ 0], 1 );
+        //nvm_read16( NVM_ADDR_TRIM_P0_TEMP_RAW_HI,  &sens.trim.temp_raw[ 0].u16[ 1],        1 );
+        //nvm_read16( NVM_ADDR_TRIM_P0_TEMP_RAW_LO,  &sens.trim.temp_raw[ 0].u16[ 0],        1 );
+        nvm_read16( NVM_ADDR_TRIM_P0_TEMP_DIGC_HI, &sens.trim.point[ 0].temp_digc.u16[ 1], 1 );
+        nvm_read16( NVM_ADDR_TRIM_P0_TEMP_DIGC_LO, &sens.trim.point[ 0].temp_digc.u16[ 0], 1 );
 
-        sys_nvm_read16( SYS_NVM_ADDR_TRIM_P0_PRES_RAW_HI,  &sens.trim.point[ 0].pres_raw.u16[ 1],     1 );
-        sys_nvm_read16( SYS_NVM_ADDR_TRIM_P0_PRES_RAW_LO,  &sens.trim.point[ 0].pres_raw.u16[ 0],     1 );
+        nvm_read16( NVM_ADDR_TRIM_P0_PRES_RAW_HI,  &sens.trim.point[ 0].pres_raw.u16[ 1],     1 );
+        nvm_read16( NVM_ADDR_TRIM_P0_PRES_RAW_LO,  &sens.trim.point[ 0].pres_raw.u16[ 0],     1 );
 
-        sys_nvm_read16( SYS_NVM_ADDR_TRIM_P1_TIMESTMP_HI,  &sens.trim.point[ 1].timestmp.u16[ 1],     1 );
-        sys_nvm_read16( SYS_NVM_ADDR_TRIM_P1_TIMESTMP_LO,  &sens.trim.point[ 1].timestmp.u16[ 0],     1 );
-        sys_nvm_read16( SYS_NVM_ADDR_TRIM_P1_OXGN_PPM_HI,  &sens.trim.point[ 1].oxgn_ppm.u16[ 1],     1 );
-        sys_nvm_read16( SYS_NVM_ADDR_TRIM_P1_OXGN_PPM_LO,  &sens.trim.point[ 1].oxgn_ppm.u16[ 0],     1 );
-        sys_nvm_read16( SYS_NVM_ADDR_TRIM_P1_OXGN_RAW_HI,  &sens.trim.point[ 1].oxgn_raw.u16[ 1],     1 );
-        sys_nvm_read16( SYS_NVM_ADDR_TRIM_P1_OXGN_RAW_LO,  &sens.trim.point[ 1].oxgn_raw.u16[ 0],     1 );
+        nvm_read16( NVM_ADDR_TRIM_P1_TIMESTMP_HI,  &sens.trim.point[ 1].timestmp.u16[ 1],     1 );
+        nvm_read16( NVM_ADDR_TRIM_P1_TIMESTMP_LO,  &sens.trim.point[ 1].timestmp.u16[ 0],     1 );
+        nvm_read16( NVM_ADDR_TRIM_P1_OXGN_PPM_HI,  &sens.trim.point[ 1].oxgn_ppm.u16[ 1],     1 );
+        nvm_read16( NVM_ADDR_TRIM_P1_OXGN_PPM_LO,  &sens.trim.point[ 1].oxgn_ppm.u16[ 0],     1 );
+        nvm_read16( NVM_ADDR_TRIM_P1_OXGN_RAW_HI,  &sens.trim.point[ 1].oxgn_raw.u16[ 1],     1 );
+        nvm_read16( NVM_ADDR_TRIM_P1_OXGN_RAW_LO,  &sens.trim.point[ 1].oxgn_raw.u16[ 0],     1 );
 
-        //sys_nvm_read16( SYS_NVM_ADDR_TRIM_P1_TEMP_RAW_HI,  &sens.trim.temp_raw[ 1].u16[ 1],     1 );
-        //sys_nvm_read16( SYS_NVM_ADDR_TRIM_P1_TEMP_RAW_LO,  &sens.trim.temp_raw[ 1].u16[ 0],     1 );
-        sys_nvm_read16( SYS_NVM_ADDR_TRIM_P1_TEMP_DIGC_HI, &sens.trim.point[ 1].temp_digc.u16[ 1], 1 );
-        sys_nvm_read16( SYS_NVM_ADDR_TRIM_P1_TEMP_DIGC_LO, &sens.trim.point[ 1].temp_digc.u16[ 0], 1 );
+        //nvm_read16( NVM_ADDR_TRIM_P1_TEMP_RAW_HI,  &sens.trim.temp_raw[ 1].u16[ 1],     1 );
+        //nvm_read16( NVM_ADDR_TRIM_P1_TEMP_RAW_LO,  &sens.trim.temp_raw[ 1].u16[ 0],     1 );
+        nvm_read16( NVM_ADDR_TRIM_P1_TEMP_DIGC_HI, &sens.trim.point[ 1].temp_digc.u16[ 1], 1 );
+        nvm_read16( NVM_ADDR_TRIM_P1_TEMP_DIGC_LO, &sens.trim.point[ 1].temp_digc.u16[ 0], 1 );
 
-        sys_nvm_read16( SYS_NVM_ADDR_TRIM_P1_PRES_RAW_HI,  &sens.trim.point[ 1].pres_raw.u16[ 1],     1 );
-        sys_nvm_read16( SYS_NVM_ADDR_TRIM_P1_PRES_RAW_LO,  &sens.trim.point[ 1].pres_raw.u16[ 0],     1 );
+        nvm_read16( NVM_ADDR_TRIM_P1_PRES_RAW_HI,  &sens.trim.point[ 1].pres_raw.u16[ 1],     1 );
+        nvm_read16( NVM_ADDR_TRIM_P1_PRES_RAW_LO,  &sens.trim.point[ 1].pres_raw.u16[ 0],     1 );
 }
 
 
@@ -246,7 +247,7 @@ main( void )
         stm32_led_sts_init();
         stm32_led_sts_set( true );
 
-        sys_nvm_init();
+        nvm_init();
         app_nvm_restore();
         sens_trim_restore( &sens.trim );
 
@@ -260,8 +261,6 @@ main( void )
         ad7799_set_buffered(    true                            );
         //ad7799_set_gain(        AD7799_GAIN_1                   );
         ad7799_set_gain(        AD7799_GAIN_2                   );
-        //ad7799_set_gain(        AD7799_GAIN_4                   );
-        //ad7799_set_gain(        AD7799_GAIN_32                   );
         ad7799_set_refdet(      false                           );
 
         //ad7799_set_pwr_swtch(   false                           );
@@ -323,10 +322,13 @@ main( void )
                 if( app.evt.tick_1hz )
                 {
                         app.evt.tick_1hz        = false;
+
                         sens.pres.raw.u32       = lps25_get_pressure_raw();
                         sens.pres.hPa.f32       = lps25_pressure_raw_to_hpa( sens.pres.raw.i32 );
+
                         sens.temp.raw           = lps25_get_temperature_raw();
                         sens.temp.digc.f32      = lps25_temperature_raw_to_digc( sens.temp.raw );
+
                         sens.oxgn.raw.u32       = sens_average( &sens.avrg, ad7799_read_single() );
                         sens.oxgn.ppm.f32       = sens_oxgn_raw_to_ppm( &sens );
                         sens.avrg.slope         = sens_oxgn_get_slope( &sens.avrg, sens.oxgn.raw.i32 );

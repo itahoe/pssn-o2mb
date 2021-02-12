@@ -50,8 +50,9 @@ sens_oxgn_raw_to_ppm(                           sens_t *        p )
                 float           a               = trim->tg;
                 float           b               = trim->ofst;
                 float           x               = oxgn->raw.i32;
+                //float           cal_digc        = temp->digc.f32;
                 //float           cal_digc        = lps25_temperature_raw_to_digc( trim->point[ 1].temp_raw );
-                float           cal_digc        = temp->digc.f32;
+                float           cal_digc        = trim->point[ 1].temp_digc.f32;
                 float           k_temp_cal      = sens_get_k_temp_digc( cal_digc );
                 float           k_temp_meas     = sens_get_k_temp_digc( temp->digc.f32 );
                 float           k_pres_cal      = trim->point[ 1].pres_raw.i32;

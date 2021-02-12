@@ -9,7 +9,8 @@
 #include "mdbs.h"
 #include "mdbs_dev_o2mb.h"
 #include "sens.h"
-#include "sys.h"
+//#include "sys.h"
+#include "nvm.h"
 #include "app.h"
 
 
@@ -442,7 +443,7 @@ mdbs_hreg_write(                        const   size_t                  idx,
 
                 case MDBS_HREG_SENS_OFST_RAW:
                         sens.oxgn.offset                        = *data;
-                        sys_nvm_write16( SYS_NVM_ADDR_SENS_OFST_RAW, &sens.oxgn.offset, 1 );
+                        nvm_write16( NVM_ADDR_SENS_OFST_RAW, &sens.oxgn.offset, 1 );
                         break;
 
 
@@ -464,16 +465,16 @@ mdbs_hreg_write(                        const   size_t                  idx,
                         sens.trim.point[ 0].temp_digc.f32       = sens.temp.digc.f32;
                         sens.trim.point[ 0].pres_raw.i32        = sens.pres.raw.i32;
                         sens_trim_restore( &sens.trim );
-                        sys_nvm_write16( SYS_NVM_ADDR_TRIM_P0_TIMESTMP_HI, &sens.trim.point[ 0].timestmp.u16[ 1], 1 );
-                        sys_nvm_write16( SYS_NVM_ADDR_TRIM_P0_TIMESTMP_LO, &sens.trim.point[ 0].timestmp.u16[ 0], 1 );
-                        sys_nvm_write16( SYS_NVM_ADDR_TRIM_P0_OXGN_PPM_HI, &sens.trim.point[ 0].oxgn_ppm.u16[ 1], 1 );
-                        sys_nvm_write16( SYS_NVM_ADDR_TRIM_P0_OXGN_PPM_LO, &sens.trim.point[ 0].oxgn_ppm.u16[ 0], 1 );
-                        sys_nvm_write16( SYS_NVM_ADDR_TRIM_P0_OXGN_RAW_HI, &sens.trim.point[ 0].oxgn_raw.u16[ 1], 1 );
-                        sys_nvm_write16( SYS_NVM_ADDR_TRIM_P0_OXGN_RAW_LO, &sens.trim.point[ 0].oxgn_raw.u16[ 0], 1 );
-                        sys_nvm_write16( SYS_NVM_ADDR_TRIM_P0_TEMP_DIGC_HI, &sens.trim.point[ 0].temp_digc.u16[ 1], 1 );
-                        sys_nvm_write16( SYS_NVM_ADDR_TRIM_P0_TEMP_DIGC_LO, &sens.trim.point[ 0].temp_digc.u16[ 0], 1 );
-                        sys_nvm_write16( SYS_NVM_ADDR_TRIM_P0_PRES_RAW_HI, &sens.trim.point[ 0].pres_raw.u16[ 1], 1 );
-                        sys_nvm_write16( SYS_NVM_ADDR_TRIM_P0_PRES_RAW_LO, &sens.trim.point[ 0].pres_raw.u16[ 0], 1 );
+                        nvm_write16( NVM_ADDR_TRIM_P0_TIMESTMP_HI, &sens.trim.point[ 0].timestmp.u16[ 1], 1 );
+                        nvm_write16( NVM_ADDR_TRIM_P0_TIMESTMP_LO, &sens.trim.point[ 0].timestmp.u16[ 0], 1 );
+                        nvm_write16( NVM_ADDR_TRIM_P0_OXGN_PPM_HI, &sens.trim.point[ 0].oxgn_ppm.u16[ 1], 1 );
+                        nvm_write16( NVM_ADDR_TRIM_P0_OXGN_PPM_LO, &sens.trim.point[ 0].oxgn_ppm.u16[ 0], 1 );
+                        nvm_write16( NVM_ADDR_TRIM_P0_OXGN_RAW_HI, &sens.trim.point[ 0].oxgn_raw.u16[ 1], 1 );
+                        nvm_write16( NVM_ADDR_TRIM_P0_OXGN_RAW_LO, &sens.trim.point[ 0].oxgn_raw.u16[ 0], 1 );
+                        nvm_write16( NVM_ADDR_TRIM_P0_TEMP_DIGC_HI, &sens.trim.point[ 0].temp_digc.u16[ 1], 1 );
+                        nvm_write16( NVM_ADDR_TRIM_P0_TEMP_DIGC_LO, &sens.trim.point[ 0].temp_digc.u16[ 0], 1 );
+                        nvm_write16( NVM_ADDR_TRIM_P0_PRES_RAW_HI, &sens.trim.point[ 0].pres_raw.u16[ 1], 1 );
+                        nvm_write16( NVM_ADDR_TRIM_P0_PRES_RAW_LO, &sens.trim.point[ 0].pres_raw.u16[ 0], 1 );
                         break;
 
                 case MDBS_HREG_SENS_TRIM_P0_OXGN_RAW_HI:
@@ -502,16 +503,16 @@ mdbs_hreg_write(                        const   size_t                  idx,
                         sens.trim.point[ 1].temp_digc.f32       = sens.temp.digc.f32;
                         sens.trim.point[ 1].pres_raw.i32        = sens.pres.raw.i32;
                         sens_trim_restore( &sens.trim );
-                        sys_nvm_write16( SYS_NVM_ADDR_TRIM_P1_TIMESTMP_HI, &sens.trim.point[ 1].timestmp.u16[ 1], 1 );
-                        sys_nvm_write16( SYS_NVM_ADDR_TRIM_P1_TIMESTMP_LO, &sens.trim.point[ 1].timestmp.u16[ 0], 1 );
-                        sys_nvm_write16( SYS_NVM_ADDR_TRIM_P1_OXGN_PPM_HI, &sens.trim.point[ 1].oxgn_ppm.u16[ 1], 1 );
-                        sys_nvm_write16( SYS_NVM_ADDR_TRIM_P1_OXGN_PPM_LO, &sens.trim.point[ 1].oxgn_ppm.u16[ 0], 1 );
-                        sys_nvm_write16( SYS_NVM_ADDR_TRIM_P1_OXGN_RAW_HI, &sens.trim.point[ 1].oxgn_raw.u16[ 1], 1 );
-                        sys_nvm_write16( SYS_NVM_ADDR_TRIM_P1_OXGN_RAW_LO, &sens.trim.point[ 1].oxgn_raw.u16[ 0], 1 );
-                        sys_nvm_write16( SYS_NVM_ADDR_TRIM_P1_TEMP_DIGC_HI, &sens.trim.point[ 1].temp_digc.u16[ 1], 1 );
-                        sys_nvm_write16( SYS_NVM_ADDR_TRIM_P1_TEMP_DIGC_LO, &sens.trim.point[ 1].temp_digc.u16[ 0], 1 );
-                        sys_nvm_write16( SYS_NVM_ADDR_TRIM_P1_PRES_RAW_HI, &sens.trim.point[ 1].pres_raw.u16[ 1], 1 );
-                        sys_nvm_write16( SYS_NVM_ADDR_TRIM_P1_PRES_RAW_LO, &sens.trim.point[ 1].pres_raw.u16[ 0], 1 );
+                        nvm_write16( NVM_ADDR_TRIM_P1_TIMESTMP_HI, &sens.trim.point[ 1].timestmp.u16[ 1], 1 );
+                        nvm_write16( NVM_ADDR_TRIM_P1_TIMESTMP_LO, &sens.trim.point[ 1].timestmp.u16[ 0], 1 );
+                        nvm_write16( NVM_ADDR_TRIM_P1_OXGN_PPM_HI, &sens.trim.point[ 1].oxgn_ppm.u16[ 1], 1 );
+                        nvm_write16( NVM_ADDR_TRIM_P1_OXGN_PPM_LO, &sens.trim.point[ 1].oxgn_ppm.u16[ 0], 1 );
+                        nvm_write16( NVM_ADDR_TRIM_P1_OXGN_RAW_HI, &sens.trim.point[ 1].oxgn_raw.u16[ 1], 1 );
+                        nvm_write16( NVM_ADDR_TRIM_P1_OXGN_RAW_LO, &sens.trim.point[ 1].oxgn_raw.u16[ 0], 1 );
+                        nvm_write16( NVM_ADDR_TRIM_P1_TEMP_DIGC_HI, &sens.trim.point[ 1].temp_digc.u16[ 1], 1 );
+                        nvm_write16( NVM_ADDR_TRIM_P1_TEMP_DIGC_LO, &sens.trim.point[ 1].temp_digc.u16[ 0], 1 );
+                        nvm_write16( NVM_ADDR_TRIM_P1_PRES_RAW_HI, &sens.trim.point[ 1].pres_raw.u16[ 1], 1 );
+                        nvm_write16( NVM_ADDR_TRIM_P1_PRES_RAW_LO, &sens.trim.point[ 1].pres_raw.u16[ 0], 1 );
 
                         break;
 
