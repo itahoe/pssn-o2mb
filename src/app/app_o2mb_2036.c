@@ -14,6 +14,9 @@
 #include "ad7799.h"
 #include "lps25.h"
 #include "nvm.h"
+//#include "filter_13.h"
+#include "filter_23.h"
+//#include "filter_47.h"
 
 
 /*******************************************************************************
@@ -49,6 +52,7 @@ static  uint16_t        adc_raw[ ADC_RAW_SIZEOF ];
 static  uint32_t        oxgn_avrg_buf[ AVERAGE_BUF_SIZEOF ];
 static  uint32_t        pres_avrg_buf[ AVERAGE_BUF_SIZEOF ];
 static  app_t           app;
+static  Filter          filter;
 
 
 /*******************************************************************************
@@ -250,6 +254,7 @@ main( void )
         nvm_init();
         app_nvm_restore();
         sens_trim_restore( &sens.trim );
+        Filter_init( &filter );
 
 
         ad7799_init();
@@ -323,15 +328,18 @@ main( void )
                 {
                         app.evt.tick_1hz        = false;
 
-                        sens.pres.raw.u32       = lps25_get_pressure_raw();
-                        sens.pres.hPa.f32       = lps25_pressure_raw_to_hpa( sens.pres.raw.i32 );
-
                         sens.temp.raw           = lps25_get_temperature_raw();
                         sens.temp.digc.f32      = lps25_temperature_raw_to_digc( sens.temp.raw );
 
-                        sens.oxgn.raw.u32       = sens_average( &sens.avrg, ad7799_read_single() );
+                        //sens.pres.raw.u32       = 0x3E8670;
+                        sens.pres.raw.u32       = lps25_get_pressure_raw();
+                        sens.pres.hPa.f32       = lps25_pressure_raw_to_hpa( sens.pres.raw.i32 );
+
+                        //sens.oxgn.raw.u32       = sens_average( &sens.avrg, ad7799_read_single() );
+                        Filter_put( &filter, ad7799_read_single() );
+                        sens.oxgn.raw.u32       = Filter_get( &filter );;
                         sens.oxgn.ppm.f32       = sens_oxgn_raw_to_ppm( &sens );
-                        sens.avrg.slope         = sens_oxgn_get_slope( &sens.avrg, sens.oxgn.raw.i32 );
+                        //sens.avrg.slope         = sens_oxgn_get_slope( &sens.avrg, sens.oxgn.raw.i32 );
                 } //app.evt.sens
         }
 }
