@@ -6,7 +6,8 @@
 
 
 #include "sys.h"
-#include "bsp.h"
+//#include "bsp.h"
+#include "stm32.h"
 
 
 /**
@@ -14,12 +15,13 @@
   * @param  None
   * @retval None
   */
+/*
 void
 sys_reset( void )
 {
         bsp_sys_reset();
 }
-
+*/
 
 /**
   * @brief  

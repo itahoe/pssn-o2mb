@@ -10,7 +10,8 @@
 #include <stdlib.h>
 #include <math.h>
 #include "sens.h"
-#include "bsp.h"
+//#include "bsp.h"
+#include "stm32.h"
 #include "app.h"
 #include "lps25.h"
 

@@ -19,7 +19,18 @@
 float
 lps25_pressure_raw_to_hpa(              const   int32_t         raw )
 {
-        return( (float) raw / 4096.0f );
+        return( (float) raw / (float) 4096.0f );
+/*
+        float   f;
+
+
+        f       = raw;
+        f       /= (float) 4096.0f;
+
+        //printf( "%f\n", f );
+
+        return( f );
+*/
 }
 
 

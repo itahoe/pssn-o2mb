@@ -12,8 +12,7 @@
 #include "cfg_mdbs.h"
 #include "cfg_sens.h"
 #include "cfg_ui.h"
-#include "cfg_lm75.h"
-#include "cfg_lps25.h"
+#include "config_i2c.h"
 
 
 #endif	//CONFIG_H

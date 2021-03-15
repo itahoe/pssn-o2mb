@@ -15,8 +15,9 @@
 #include "lps25.h"
 #include "nvm.h"
 //#include "filter_13.h"
-#include "filter_23.h"
+//#include "filter_23.h"
 //#include "filter_47.h"
+#include "filter_025_125_60db_29taps.h"
 
 
 /*******************************************************************************
@@ -40,7 +41,8 @@ typedef struct  app_s
 /*******************************************************************************
 * PRIVATE DEFINES
 *******************************************************************************/
-#define AVERAGE_BUF_SIZEOF              32
+//#define AVERAGE_BUF_SIZEOF              128
+#define AVERAGE_BUF_SIZEOF              2
 #define ADC_RAW_SIZEOF                  2
 
 
@@ -263,13 +265,10 @@ main( void )
         ad7799_set_rate(        AD7799_RATE_4_17_Hz             );
         ad7799_set_burnout(     false                           );
         ad7799_set_unipolar(    true                            );
-        ad7799_set_buffered(    true                            );
-        //ad7799_set_gain(        AD7799_GAIN_1                   );
-        ad7799_set_gain(        AD7799_GAIN_2                   );
+        ad7799_set_buffered(    false                            );
+        ad7799_set_gain(        AD7799_GAIN_1                   );
         ad7799_set_refdet(      false                           );
-
-        //ad7799_set_pwr_swtch(   false                           );
-        ad7799_set_pwr_swtch(   true                            );
+        ad7799_set_pwr_swtch(   false                           );
 
         ad7799_set_channel(     AD7799_CHNL_AIN1P_AIN1M         );
         //ad7799_set_channel(     AD7799_CHNL_AVDD_MONITOR        );
@@ -332,12 +331,12 @@ main( void )
                         sens.temp.digc.f32      = lps25_temperature_raw_to_digc( sens.temp.raw );
 
                         //sens.pres.raw.u32       = 0x3E8670;
-                        sens.pres.raw.u32       = lps25_get_pressure_raw();
+                        sens.pres.raw.i32       = lps25_get_pressure_raw();
                         sens.pres.hPa.f32       = lps25_pressure_raw_to_hpa( sens.pres.raw.i32 );
 
-                        //sens.oxgn.raw.u32       = sens_average( &sens.avrg, ad7799_read_single() );
-                        Filter_put( &filter, ad7799_read_single() );
-                        sens.oxgn.raw.u32       = Filter_get( &filter );;
+                        sens.oxgn.raw.u32       = sens_average( &sens.avrg, ad7799_read_single() );
+                        //Filter_put( &filter, ad7799_read_single() );
+                        //sens.oxgn.raw.u32       = Filter_get( &filter );;
                         sens.oxgn.ppm.f32       = sens_oxgn_raw_to_ppm( &sens );
                         //sens.avrg.slope         = sens_oxgn_get_slope( &sens.avrg, sens.oxgn.raw.i32 );
                 } //app.evt.sens
