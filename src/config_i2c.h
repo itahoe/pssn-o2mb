@@ -9,7 +9,7 @@
 #define  CONFIG_I2C_H
 
 
-#define CONFIG_I2C_ADDR_LM75                    0x90
+//#define CONFIG_I2C_ADDR_LM75                    0x90
 
 #define CONFIG_I2C_ADDR_LPS25                   0xB8
 //#define CONFIG_I2C_ADDR_LPS25                   0xBA

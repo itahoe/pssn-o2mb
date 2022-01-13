@@ -13,7 +13,7 @@ typedef enum    nvm_addr_e
         NVM_ADDR_SENS_OFST_RAW,
         NVM_ADDR_02,
         NVM_ADDR_03,
-        NVM_ADDR_04,
+        NVM_ADDR_AFE_CHANNEL,
         NVM_ADDR_05,
         NVM_ADDR_06,
         NVM_ADDR_07,

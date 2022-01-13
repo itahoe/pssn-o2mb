@@ -10,8 +10,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include "sens.h"
-//#include "bsp.h"
-#include "stm32.h"
+//#include "stm32.h"
 #include "app.h"
 #include "lps25.h"
 
@@ -48,26 +47,32 @@ sens_oxgn_raw_to_ppm(                           sens_t *        p )
         const   sens_temp_t *   temp            = &( p->temp );
         const   sens_pres_t *   pres            = &( p->pres );
         const   sens_trim_t *   trim            = &( p->trim );
-                float           a               = trim->tg;
-                float           b               = trim->ofst;
-                float           x               = oxgn->raw.i32;
+        //const   sens_afe_t *    afe             = &( p->afe );
+                //float           a               = trim->slope;
+                //float           b               = trim->offset;
+                //float           x               = oxgn->raw.i32;
                 //float           cal_digc        = temp->digc.f32;
                 //float           cal_digc        = lps25_temperature_raw_to_digc( trim->point[ 1].temp_raw );
+
                 float           cal_digc        = trim->point[ 1].temp_digc.f32;
                 float           k_temp_cal      = sens_get_k_temp_digc( cal_digc );
-                float           k_temp_meas     = sens_get_k_temp_digc( temp->digc.f32 );
-                float           k_pres_cal      = trim->point[ 1].pres_raw.i32;
-                float           k_pres_meas     = pres->raw.i32;
 
-                float           ppm;
+                //float           k_temp_meas     = sens_get_k_temp_digc( temp->digc.f32 );
+                float           k_temp_meas     = 1;
 
+                //float           k_pres_cal      = trim->point[ 1].pres_raw.i32;
+                //float           k_pres_meas     = pres->raw.i32;
+                //float           ppm;
+                //float           afe_t_offset    = afe->k_temp_drift.f32 * temp->digc.f32;
 
-        oxgn->fv.f32    = a * x + b;
-        oxgn->ft.f32    = k_temp_cal / k_temp_meas;
-        oxgn->fp.f32    = k_pres_cal / k_pres_meas;
-        ppm             = oxgn->fv.f32 * oxgn->ft.f32 * oxgn->fp.f32;
+                //float           afe_t_offset    = p->drift_k_temp.f32 * temp->digc.f32;
+                //float           afe_p_offset    = p->drift_k_pres.f32 * pres->hPa.f32;
 
-        return( ppm );
+        //return( trim->slope * (oxgn->raw.i32 + afe_t_offset) + trim->offset );
+        //return( trim->slope * (oxgn->raw.i32 + afe_t_offset + afe_p_offset) + trim->offset );
+        //return( (trim->slope * k_temp_meas * oxgn->raw.i32) + trim->offset );
+
+        return( trim->slope * k_temp_meas * (oxgn->raw.i32 + trim->offset) );
 }
 
 
@@ -94,6 +99,9 @@ sens_trim_restore(                              sens_trim_t *   p )
         float           p1_raw  = p->point[ 1].oxgn_raw.u32;
 
 
-        p->tg           = (p1_ppm - p0_ppm) / (p1_raw - p0_raw);
-        p->ofst         = p1_ppm - (p1_raw * p->tg);
+        p->offset       = 0 - p0_raw;
+        p->slope        = p1_ppm / (p1_raw + p->offset);
+
+        //p->slope        = (p1_ppm - p0_ppm) / (p1_raw - p0_raw);
+        //p->offset       = p1_ppm - (p1_raw * p->slope);
 }

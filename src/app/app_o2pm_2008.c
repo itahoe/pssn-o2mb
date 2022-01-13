@@ -74,7 +74,7 @@ static  app_t           app;
 
         .mcu.serial_num         = sys_serial_num,
         .mcu.device_id          = sys_device_id,
-        //.mcu.hardware_id        = sys_hardware_id,
+        .mcu.hardware_id        = sys_hardware_id,
         .mcu.firmware_id        = sys_firmware_id,
 };
 
@@ -84,7 +84,7 @@ static  app_t           app;
         NVM_ADDR_SENS_OFST_RAW,
         NVM_ADDR_02,
         NVM_ADDR_03,
-        NVM_ADDR_04,
+        NVM_ADDR_AFE_CHANNEL,
         NVM_ADDR_05,
         NVM_ADDR_06,
         NVM_ADDR_07,
@@ -228,6 +228,19 @@ void
 HAL_ADC_ConvCpltCallback(                       ADC_HandleTypeDef *     hadc )
 {
         app.evt.adc     = true;
+}
+
+
+void
+app_set_afe_gain(                       const   uint16_t        afe_gain )
+{
+}
+
+
+uint16_t
+app_afe_set_channel(                    const   uint16_t        channel )
+{
+        return( 0 );
 }
 
 

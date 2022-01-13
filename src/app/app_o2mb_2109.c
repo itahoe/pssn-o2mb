@@ -43,7 +43,7 @@ typedef struct  app_s
 * PRIVATE DEFINES
 *******************************************************************************/
 //#define AVERAGE_BUF_SIZEOF              128
-#define AVERAGE_BUF_SIZEOF              2
+#define AVERAGE_BUF_SIZEOF              8
 #define ADC_RAW_SIZEOF                  2
 
 
@@ -282,13 +282,27 @@ main( void )
         stm32_i2c2_init();
 
         lmp91000_write_unlock();
-        lmp91000_set_tia_gain(          LMP91000_TIA_GAIN_2K75          );
-        lmp91000_set_rload(             LMP91000_RLOAD_10R              );
+        //lmp91000_set_tia_gain(          LMP91000_TIA_GAIN_2K75          );
+        //lmp91000_set_tia_gain(          LMP91000_TIA_GAIN_3K5           );
+        //lmp91000_set_tia_gain(          LMP91000_TIA_GAIN_7K            );
+        //lmp91000_set_tia_gain(          LMP91000_TIA_GAIN_14K           );
+        //lmp91000_set_tia_gain(          LMP91000_TIA_GAIN_35K           );
+        lmp91000_set_tia_gain(          LMP91000_TIA_GAIN_120K          );
+        //lmp91000_set_tia_gain(          LMP91000_TIA_GAIN_350K          );
+
+        //lmp91000_set_rload(             LMP91000_RLOAD_10R              );
+        //lmp91000_set_rload(             LMP91000_RLOAD_33R              );
+        //lmp91000_set_rload(             LMP91000_RLOAD_50R              );
+        lmp91000_set_rload(             LMP91000_RLOAD_100R              );
+
         lmp91000_set_reference_source(  LMP91000_REF_SRC_EXTERNAL       );
+        //lmp91000_set_internal_zero(     LMP91000_INT_ZERO_50_PERCENT    );
         lmp91000_set_internal_zero(     LMP91000_INT_ZERO_20_PERCENT    );
-        lmp91000_set_fet_short(         LMP91000_FET_SHORT_DISABLE      );
-        lmp91000_set_mode(              LMP91000_MODE_3_LEAD_CELL       );
+        lmp91000_set_fet_short(         LMP91000_FET_SHORT_DISABLE       );
+        //lmp91000_set_mode(              LMP91000_MODE_STANDBY           );
         lmp91000_write_lock();
+        lmp91000_set_mode(              LMP91000_MODE_3_LEAD_CELL       );
+
 
         lps25_set_ctl( LPS25_CTL_POWER_DOWN, 1 );
         lps25_set_data_rate( LPS25_RATE_1_Hz );
@@ -304,6 +318,11 @@ main( void )
         stm32_usart1_config_baudrate( CFG_MDBS_BAUDRATE );
         stm32_usart1_init();
         stm32_usart1_recv_dma( modbus_adu, MDBS_RTU_ADU_SIZEOF );
+
+        sens.temp.raw           = 0x5555;
+        sens.temp.digc.f32      = 25.0;
+        sens.pres.raw.u32       = 0x3E8670;
+        sens.pres.hPa.f32       = lps25_pressure_raw_to_hpa( sens.pres.raw.i32 );
 
 
         while( true )
@@ -334,19 +353,36 @@ main( void )
                 if( app.evt.tick_1hz )
                 {
                         app.evt.tick_1hz        = false;
-
+/*
                         sens.temp.raw           = lps25_get_temperature_raw();
                         sens.temp.digc.f32      = lps25_temperature_raw_to_digc( sens.temp.raw );
 
                         //sens.pres.raw.u32       = 0x3E8670;
                         sens.pres.raw.i32       = lps25_get_pressure_raw();
                         sens.pres.hPa.f32       = lps25_pressure_raw_to_hpa( sens.pres.raw.i32 );
+*/
+
+                        lmp91000_set_mode( LMP91000_MODE_3_LEAD_CELL );
+                        //lmp91000_set_mode( LMP91000_MODE_2_LEAD_CELL );
+                        //lmp91000_set_mode( LMP91000_MODE_TEMP_MEAS_TIA_ON );
+
+                        //HAL_Delay( 10 );
 
                         sens.oxgn.raw.u32       = sens_average( &sens.avrg, ad7799_read_single() );
                         //Filter_put( &filter, ad7799_read_single() );
                         //sens.oxgn.raw.u32       = Filter_get( &filter );;
                         sens.oxgn.ppm.f32       = sens_oxgn_raw_to_ppm( &sens );
-                        //sens.avrg.slope         = sens_oxgn_get_slope( &sens.avrg, sens.oxgn.raw.i32 );
+                        sens.avrg.slope         = sens_oxgn_get_slope( &sens.avrg, sens.oxgn.raw.i32 );
+
+
+                        lmp91000_set_mode( LMP91000_MODE_TEMP_MEAS_TIA_ON );
+                        HAL_Delay( 1 );
+                        sens.temp.raw           = ad7799_read_single();
+                        //float adc_lsb_mV      = ADC_VREF_mV / ((uint32_t) 1 << 24);
+                        sens.temp.digc.f32      = lmp91000_temperature_mV_to_digc( sens.temp.raw * 0.0001490116119384765625);
+
+                        //lmp91000_set_mode( LMP91000_MODE_STANDBY );
+
                 } //app.evt.sens
         }
 }

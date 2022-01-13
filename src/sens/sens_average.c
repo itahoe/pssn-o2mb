@@ -18,22 +18,22 @@ int32_t
 sens_average(                                   sens_avrg_t *           p,
                                                 int32_t                 sample )
 {
-        int32_t         average;
+        //int32_t         average;
 
 
-        p->sum                  -= p->buf[ p->idx ];
         p->sum                  += sample;
+        p->sum                  -= p->buf[ p->idx ];
+        p->buf[ p->idx ]        =  sample;
 
-        p->buf[ p->idx++ ]      =  sample;
+        p->idx++;
 
         if( p->idx >= p->buf_sizeof )
         {
                 p->idx                  = 0;
         }
 
-        average = p->sum / p->buf_sizeof;
-
-        return( average );
+        return( p->sum / p->buf_sizeof );
+        //return( p->sum );
 }
 
 
