@@ -54,9 +54,9 @@ typedef struct  sens_oxgn_s
         sens_union_t            raw;
         sens_union_t            ppm;
         //uint16_t                offset;
-        sens_union_t            fv;
-        sens_union_t            ft;
-        sens_union_t            fp;
+        //sens_union_t            fv;
+        //sens_union_t            ft;
+        //sens_union_t            fp;
 } sens_oxgn_t;
 
 

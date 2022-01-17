@@ -12,7 +12,7 @@
 * REG READ
 *******************************************************************************/
 uint16_t
-ad7799_reg_read(                const   ad7799_addr_t           addr )
+ad7799_read(                    const   ad7799_addr_t           addr )
 {
         uint8_t         data_hi, data_lo;
 
@@ -29,7 +29,7 @@ ad7799_reg_read(                const   ad7799_addr_t           addr )
 * REG WRITE
 *******************************************************************************/
 void
-ad7799_reg_write(               const   ad7799_addr_t           addr,
+ad7799_write(                   const   ad7799_addr_t           addr,
                                 const   uint16_t                data )
 {
 	ad7799_x_enable( true );	    
@@ -99,14 +99,13 @@ ad7799_init( void )
 uint32_t
 ad7799_get_sample( void )
 {
-        //ad7799_reg_mode_t       reg;
         ad7799_reg_t            reg;
         uint8_t                 data;
 
 
-        reg.mode.u16    = ad7799_reg_read( AD7799_REG_MODE );
+        reg.mode.u16    = ad7799_read( AD7799_REG_MODE );
         reg.mode.mode   = AD7799_MODE_SINGLE;
-        ad7799_reg_write( AD7799_REG_MODE, reg.mode.u16 );
+        ad7799_write( AD7799_REG_MODE, reg.mode.u16 );
 
 
 	ad7799_x_enable( true );

@@ -14,8 +14,8 @@
 #include "lps25.h"
 #include "nvm.h"
 //#include "filter_13.h"
-//#include "filter_23.h"
-#include "filter_47.h"
+#include "filter_23.h"
+//#include "filter_47.h"
 //#include "filter_025_125_60db_29taps.h"
 #include "config.h"
 
@@ -63,7 +63,8 @@ const   dev_conf_t      dev_conf        =
         .firmware_id            = { 0x2112, 0x1300, },
         .serial_num             = { 0x0011, 0x2233, 0x4455, 0x6677, 0x8899, 0xAABB, 0xCCDD, 0xEEFF, },
         .adc_vref_mV            = 2500,
-        .adc_resolution_bits    = 24,
+        //.adc_resolution_bits    = 24,
+        .adc_resolution_bits    = 32,
 };
 
         dev_t           dev             =
@@ -143,9 +144,9 @@ static
 void
 app_nvm_restore()
 {
-        nvm_read16( NVM_ADDR_STARTS_COUNT,          &dev.mcu.starts_cnt,                   1 );
-        dev.mcu.starts_cnt++;
-        nvm_write16( NVM_ADDR_STARTS_COUNT,         &dev.mcu.starts_cnt,                   1 );
+        nvm_read16( NVM_ADDR_STARTS_COUNT,          &dev.starts_cnt,                   1 );
+        dev.starts_cnt++;
+        nvm_write16( NVM_ADDR_STARTS_COUNT,         &dev.starts_cnt,                   1 );
 
         nvm_read16( NVM_ADDR_AFE_BIAS,              &dev.afe.bias,                      1 );
         nvm_read16( NVM_ADDR_AFE_ADC_REG_MODE,      &dev.ad7799.reg.mode.u16,       1 );
@@ -273,14 +274,14 @@ main( void )
         int resp        = ad7799_init();
 
         //dev.ad7799.reg.mode.u16         = ad7799_reg_mode_read();
-        dev.ad7799.reg.mode.u16         = ad7799_reg_read( AD7799_REG_MODE );
+        dev.ad7799.reg.mode.u16         = ad7799_read( AD7799_REG_MODE );
         dev.ad7799.reg.mode.rate        = AD7799_RATE_4_17_Hz;
         dev.ad7799.reg.mode.mode        = AD7799_MODE_SINGLE;
         //ad7799_reg_mode_write( dev.ad7799.reg.mode );
         //ad7799_reg_write( AD7799_REG_MODE, dev.ad7799.reg.mode );
-        ad7799_reg_write( AD7799_REG_MODE, dev.ad7799.reg.mode.u16 );
+        ad7799_write( AD7799_REG_MODE, dev.ad7799.reg.mode.u16 );
         //ad7799_reg_conf_write( dev.ad7799.reg.conf );
-        ad7799_reg_write( AD7799_REG_CONF, dev.ad7799.reg.conf.u16 );
+        ad7799_write( AD7799_REG_CONF, dev.ad7799.reg.conf.u16 );
 
 
         stm32_i2c1_init();
@@ -337,7 +338,6 @@ main( void )
                 {
                         app.evt.tick_1hz        = false;
 
-                        dev_proc( &dev );
 
                         /*
                         dev_sens_temp_update( &dev );
@@ -352,8 +352,12 @@ main( void )
                         sens.pres.hPa.f32       = lps25_pressure_raw_to_hpa( sens.pres.raw.i32 );
 
                         //sens.oxgn.raw.i32       = sens_average( &sens.avrg, ad7799_get_sample() );
-                        dev.afe.adc_raw.u32     = ad7799_get_sample();
-                        sens.oxgn.raw.i32       = sens_average( &sens.avrg, dev.afe.adc_raw.u32 );
+
+                        //dev.meas.sens.raw.i32   = ad7799_get_sample();
+
+                        dev_proc( &dev );
+
+                        sens.oxgn.raw.i32       = sens_average( &sens.avrg, dev.meas.sens.raw.i32 );
                         Filter_put( &filter, sens.oxgn.raw.i32 );
                         sens.oxgn.raw.i32       = Filter_get( &filter );
 

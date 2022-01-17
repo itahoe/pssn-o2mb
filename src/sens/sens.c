@@ -18,7 +18,7 @@
 /*******************************************************************************
 * PRIVATE FUNCTIONS
 *******************************************************************************/
-//static
+static
 float
 sens_get_k_temp_digc(                   const   float           t_digc )
 {
@@ -26,8 +26,12 @@ sens_get_k_temp_digc(                   const   float           t_digc )
         const   float   b       = -2.60e-05;
         const   float   c       =  1.70e-02;
         const   float   d       =  5.61e-01;
+                float   k;
 
-        return( (powf(t_digc, 3) * a) + (powf(t_digc, 2) * b) + (t_digc * c) + d );
+        k       = (powf(t_digc, 3) * a) + (powf(t_digc, 2) * b) + (t_digc * c) + d;
+        return(k);
+
+        //return( (powf(t_digc, 3) * a) + (powf(t_digc, 2) * b) + (t_digc * c) + d );
 }
 
 
@@ -39,40 +43,36 @@ sens_get_k_temp_digc(                   const   float           t_digc )
 *       signal @ T[у]=signal @ 25у x Pcoe @ T[у]
 *       signal @ (0у)=signal @ 25у x 0.561
 *******************************************************************************/
-
+/*
 float
 sens_oxgn_raw_to_ppm(                           sens_t *        p )
 {
                 sens_oxgn_t *   oxgn            = &( p->oxgn );
-        const   sens_temp_t *   temp            = &( p->temp );
-        const   sens_pres_t *   pres            = &( p->pres );
+        //const   sens_temp_t *   temp            = &( p->temp );
+        //const   sens_pres_t *   pres            = &( p->pres );
         const   sens_trim_t *   trim            = &( p->trim );
-        //const   sens_afe_t *    afe             = &( p->afe );
-                //float           a               = trim->slope;
-                //float           b               = trim->offset;
-                //float           x               = oxgn->raw.i32;
-                //float           cal_digc        = temp->digc.f32;
-                //float           cal_digc        = lps25_temperature_raw_to_digc( trim->point[ 1].temp_raw );
-
                 float           cal_digc        = trim->point[ 1].temp_digc.f32;
                 float           k_temp_cal      = sens_get_k_temp_digc( cal_digc );
-
                 //float           k_temp_meas     = sens_get_k_temp_digc( temp->digc.f32 );
                 float           k_temp_meas     = 1;
 
-                //float           k_pres_cal      = trim->point[ 1].pres_raw.i32;
-                //float           k_pres_meas     = pres->raw.i32;
-                //float           ppm;
-                //float           afe_t_offset    = afe->k_temp_drift.f32 * temp->digc.f32;
+        return( (oxgn->raw.i32 + trim->offset) * trim->slope * k_temp_meas );
+}
+*/
 
-                //float           afe_t_offset    = p->drift_k_temp.f32 * temp->digc.f32;
-                //float           afe_p_offset    = p->drift_k_pres.f32 * pres->hPa.f32;
+float
+sens_oxgn_raw_to_ppm(                           sens_t *        p )
+{
+        const   sens_oxgn_t *   oxgn            = &( p->oxgn );
+        //const   sens_temp_t *   temp            = &( p->temp );
+        //const   sens_pres_t *   pres            = &( p->pres );
+        const   sens_trim_t *   trim            = &( p->trim );
+                //float           cal_digc        = trim->point[ 1].temp_digc.f32;
+                //float           k_temp_cal      = sens_get_k_temp_digc( cal_digc );
+                float           k_temp  = sens_get_k_temp_digc( p->temp.digc.f32 );
+                float           k_pres  = (float) (p->pres.raw.u32) / p->trim.point[ 1].pres_raw.u32;
 
-        //return( trim->slope * (oxgn->raw.i32 + afe_t_offset) + trim->offset );
-        //return( trim->slope * (oxgn->raw.i32 + afe_t_offset + afe_p_offset) + trim->offset );
-        //return( (trim->slope * k_temp_meas * oxgn->raw.i32) + trim->offset );
-
-        return( trim->slope * k_temp_meas * (oxgn->raw.i32 + trim->offset) );
+        return( (oxgn->raw.i32 + trim->offset) * trim->slope * k_temp * k_pres );
 }
 
 
@@ -87,7 +87,7 @@ sens_trim_restore(                              sens_trim_t *   p )
         //float           p0_digc = lps25_temperature_raw_to_digc( p->point[ 0].temp_raw );
         float           p0_digc = p->point[ 0].temp_digc.f32;
         float           k_p0    = sens_get_k_temp_digc( p0_digc );
-        float           p0_ppm  = p->point[ 0].oxgn_ppm.u32;
+        //float           p0_ppm  = p->point[ 0].oxgn_ppm.u32;
         //float           p0_raw  = p->point[ 0].oxgn_raw.u32 / k_p0;
         float           p0_raw  = p->point[ 0].oxgn_raw.u32;
 

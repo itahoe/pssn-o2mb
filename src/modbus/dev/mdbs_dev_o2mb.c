@@ -15,9 +15,8 @@
 #include "dev.h"
 
 
-extern  sens_t          sens;
-//extern  dev_conf_t      dev_conf;
 extern  dev_t           dev;
+extern  sens_t          sens;
 
 
 /**
@@ -228,7 +227,7 @@ mdbs_hreg_read(                         const   size_t                  idx,
                         break;
 
                 case MDBS_HREG_STARTS_COUNTER:
-                        *data   = dev.mcu.starts_cnt;
+                        *data   = dev.starts_cnt;
                         break;
 
                 case MDBS_HREG_RESERVED_12:
@@ -259,27 +258,33 @@ mdbs_hreg_read(                         const   size_t                  idx,
                         break;
 
                 case MDBS_HREG_RAW2PPM_FV_HI:
-                        *data   = sens.oxgn.fv.u16[ 1];
+                        //*data   = sens.oxgn.fv.u16[ 1];
+                        *data   = 0;
                         break;
 
                 case MDBS_HREG_RAW2PPM_FV_LO:
-                        *data   = sens.oxgn.fv.u16[ 0];
+                        //*data   = sens.oxgn.fv.u16[ 0];
+                        *data   = 0;
                         break;
 
                 case MDBS_HREG_RAW2PPM_FT_HI:
-                        *data   = sens.oxgn.ft.u16[ 1];
+                        //*data   = sens.oxgn.ft.u16[ 1];
+                        *data   = 0;
                         break;
 
                 case MDBS_HREG_RAW2PPM_FT_LO:
-                        *data   = sens.oxgn.ft.u16[ 0];
+                        //*data   = sens.oxgn.ft.u16[ 0];
+                        *data   = 0;
                         break;
 
                 case MDBS_HREG_RAW2PPM_FP_HI:
-                        *data   = sens.oxgn.fp.u16[ 1];
+                        //*data   = sens.oxgn.fp.u16[ 1];
+                        *data   = 0;
                         break;
 
                 case MDBS_HREG_RAW2PPM_FP_LO:
-                        *data   = sens.oxgn.fp.u16[ 0];
+                        //*data   = sens.oxgn.fp.u16[ 0];
+                        *data   = 0;
                         break;
 
 
@@ -315,12 +320,12 @@ mdbs_hreg_read(                         const   size_t                  idx,
 
                 case MDBS_HREG_SENS_RAW_HI:
                         //*data   = sens.oxgn.raw.u16[ 1];
-                        *data   = dev.afe.adc_raw.u16[ 1];
+                        *data   = dev.meas.sens.raw.u16[ 1];
                         break;
 
                 case MDBS_HREG_SENS_RAW_LO:
                         //*data   = sens.oxgn.raw.u16[ 0];
-                        *data   = dev.afe.adc_raw.u16[ 0];
+                        *data   = dev.meas.sens.raw.u16[ 0];
                         break;
 
                 case MDBS_HREG_TEMP_RAW_HI:
@@ -612,12 +617,12 @@ mdbs_hreg_read(                         const   size_t                  idx,
 
                 case MDBS_HREG_MEAS_ADC_RAW_HI:
                         //*data   = sens.oxgn.raw.u16[ 1];
-                        *data   = dev.afe.adc_raw.u16[ 1];
+                        *data   = dev.meas.sens.raw.u16[ 1];
                         break;
 
                 case MDBS_HREG_MEAS_ADC_RAW_LO:
                         //*data   = sens.oxgn.raw.u16[ 0];
-                        *data   = dev.afe.adc_raw.u16[ 0];
+                        *data   = dev.meas.sens.raw.u16[ 0];
                         break;
 
                 case MDBS_HREG_MEAS_TEMPERATURE_RAW_HI:
@@ -657,7 +662,7 @@ mdbs_hreg_read(                         const   size_t                  idx,
                         break;
 
                 case MDBS_HREG_STS_STARTS_COUNTER:
-                        *data   = dev.mcu.starts_cnt;
+                        *data   = dev.starts_cnt;
                         break;
 
                 case MDBS_HREG_STS_RESERVED_0302:
@@ -722,7 +727,7 @@ mdbs_hreg_write(                        const   size_t                  idx,
                         break;  //address exist, read-only register, do nothing
 
                 case MDBS_HREG_STARTS_COUNTER:
-                        dev.mcu.starts_cnt      = *data;
+                        dev.starts_cnt      = *data;
                         break;
 
                 case MDBS_HREG_RESERVED_12:
@@ -994,7 +999,7 @@ mdbs_hreg_write(                        const   size_t                  idx,
                         break;  //address exist, read-only register, do nothing
 
                 case MDBS_HREG_STS_STARTS_COUNTER:
-                        dev.mcu.starts_cnt      = *data;
+                        dev.starts_cnt      = *data;
                         break;
 
                 case MDBS_HREG_STS_RESERVED_0302:
