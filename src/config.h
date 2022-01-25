@@ -15,4 +15,11 @@
 #include "config_i2c.h"
 
 
+//#define CONF_SMA_ORDER                  8
+//#define CONF_SMA_BUF_SIZEOF             16
+
+#define CONF_SMA_BUF_SIZEOF             8
+#define CONF_LPF_ORDER_MAX              4
+
+
 #endif	//CONFIG_H

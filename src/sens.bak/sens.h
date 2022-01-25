@@ -31,6 +31,7 @@ typedef struct  sens_avrg_s
         uint16_t                slope;
 } sens_avrg_t;
 
+/*
 typedef struct  sens_trim_point_s
 {
         sens_union_t            timestmp;
@@ -47,8 +48,9 @@ typedef struct  sens_trim_s
         float                   offset;
         float                   slope;
 } sens_trim_t;
+*/
 
-
+/*
 typedef struct  sens_oxgn_s
 {
         sens_union_t            raw;
@@ -58,41 +60,55 @@ typedef struct  sens_oxgn_s
         //sens_union_t            ft;
         //sens_union_t            fp;
 } sens_oxgn_t;
-
-
+*/
+/*
 typedef struct  sens_temp_s
 {
         int32_t                 raw;
         sens_union_t            digc;
 } sens_temp_t;
+*/
 
-
+/*
 typedef struct  sens_pres_s
 {
         sens_union_t            raw;
         sens_union_t            hPa;
         sens_avrg_t             avrg;
 } sens_pres_t;
-
-
+*/
+/*
+typedef struct  sens_meas_s
+{
+        sens_union_t            raw;
+        sens_union_t            ppm;
+        uint16_t                slope;
+} sens_meas_t;
+*/
 typedef struct  sens_s
 {
-        sens_trim_t             trim;
+        //sens_trim_t             trim;
         //sens_afe_t              afe;
-        sens_avrg_t             avrg;
-        sens_oxgn_t             oxgn;
-        sens_temp_t             temp;
-        sens_pres_t             pres;
-        sens_union_t            drift_k_temp;
-        sens_union_t            drift_k_pres;
+        //sens_avrg_t             avrg;
+        //sens_oxgn_t             oxgn;
+        //sens_temp_t             temp;
+        //sens_pres_t             pres;
+        //sens_union_t            drift_k_temp;
+        //sens_union_t            drift_k_pres;
+        //sens_meas_t             meas;
+
+        int                     dunny;
+
 } sens_t;
 
 
 /*******************************************************************************
 * 
 *******************************************************************************/
+/*
 void
-sens_trim_restore(                              sens_trim_t *   p );
+sens_trim_restore(                              dev_sens_trim_t *   p );
+*/
 
 /*******************************************************************************
 * SENS OXGN
@@ -119,9 +135,16 @@ sens_correction(                        const   uint32_t        sample,
         return( (uint32_t) f );
 }
 
-
+/*
 float
 sens_oxgn_raw_to_ppm(                           sens_t *        p );
+*/
+
+/*
+float
+sens_oxgn_raw_to_ppm(                           sens_t *        p,
+                                                int32_t         raw );
+*/
 
 int32_t
 sens_average(                                   sens_avrg_t *   p,

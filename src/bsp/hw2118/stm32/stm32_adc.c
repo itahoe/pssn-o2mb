@@ -132,9 +132,9 @@ stm32_adc_start(                                uint16_t *      data,
   * @retval None
   */
 int32_t
-stm32_adc_raw_to_vref_mV(               const   int32_t         smpl )
+stm32_adc_raw_to_vref_mV(               const   int32_t         raw )
 {
-        return( __LL_ADC_CALC_VREFANALOG_VOLTAGE( smpl, LL_ADC_RESOLUTION_12B ) );
+        return( __LL_ADC_CALC_VREFANALOG_VOLTAGE( raw, LL_ADC_RESOLUTION_12B ) );
 }
 
 
@@ -144,10 +144,10 @@ stm32_adc_raw_to_vref_mV(               const   int32_t         smpl )
   * @retval None
   */
 int32_t
-stm32_adc_raw_to_celsius(               const   int32_t         smpl,
+stm32_adc_raw_to_celsius(               const   int32_t         raw,
                                         const   int32_t         vref_mv )
 {
-        return( __LL_ADC_CALC_TEMPERATURE( vref_mv, smpl, LL_ADC_RESOLUTION_12B ) );
+        return( __LL_ADC_CALC_TEMPERATURE( vref_mv, raw, LL_ADC_RESOLUTION_12B ) );
 }
 
 
