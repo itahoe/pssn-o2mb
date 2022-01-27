@@ -96,98 +96,6 @@ const   dev_conf_t      dev_conf        =
 
 
 /*******************************************************************************
-* GLOBAL VARIABLES
-*******************************************************************************/
-        uint16_t                VirtAddVarTab[ NVM_ADDR_MAX ]  =
-{
-        NVM_ADDR_STARTS_COUNT,
-        NVM_ADDR_AFE_BIAS,
-        NVM_ADDR_AFE_ADC_REG_MODE,
-        NVM_ADDR_AFE_ADC_REG_CONF,
-        NVM_ADDR_AFE_K_TEMP_DRIFT_HI,
-        NVM_ADDR_AFE_K_TEMP_DRIFT_LO,
-        NVM_ADDR_AFE_K_PRES_DRIFT_HI,
-        NVM_ADDR_AFE_K_PRES_DRIFT_LO,
-
-        NVM_ADDR_TRIM_P0_TIMESTMP_LO,
-        NVM_ADDR_TRIM_P0_TIMESTMP_HI,
-        NVM_ADDR_TRIM_P0_OXGN_PPM_LO,
-        NVM_ADDR_TRIM_P0_OXGN_PPM_HI,
-        NVM_ADDR_TRIM_P0_OXGN_RAW_LO,
-        NVM_ADDR_TRIM_P0_OXGN_RAW_HI,
-        NVM_ADDR_TRIM_P0_TEMP_DIGC_LO,
-        NVM_ADDR_TRIM_P0_TEMP_DIGC_HI,
-        NVM_ADDR_TRIM_P0_PRES_RAW_LO,
-        NVM_ADDR_TRIM_P0_PRES_RAW_HI,
-        NVM_ADDR_18,
-        NVM_ADDR_19,
-
-        NVM_ADDR_TRIM_P1_TIMESTMP_LO,
-        NVM_ADDR_TRIM_P1_TIMESTMP_HI,
-        NVM_ADDR_TRIM_P1_OXGN_PPM_LO,
-        NVM_ADDR_TRIM_P1_OXGN_PPM_HI,
-        NVM_ADDR_TRIM_P1_OXGN_RAW_LO,
-        NVM_ADDR_TRIM_P1_OXGN_RAW_HI,
-        NVM_ADDR_TRIM_P1_TEMP_DIGC_LO,
-        NVM_ADDR_TRIM_P1_TEMP_DIGC_HI,
-        NVM_ADDR_TRIM_P1_PRES_RAW_LO,
-        NVM_ADDR_TRIM_P1_PRES_RAW_HI,
-        NVM_ADDR_30,
-        NVM_ADDR_31,
-};
-
-
-/*******************************************************************************
-* PRIVATE FUNCTIONS
-*******************************************************************************/
-/**
-  * @brief  
-  * @param  None
-  * @retval None
-  */
-static
-void
-app_nvm_restore()
-{
-        nvm_read16( NVM_ADDR_STARTS_COUNT,          &dev.starts_cnt,                   1 );
-        dev.starts_cnt++;
-        nvm_write16( NVM_ADDR_STARTS_COUNT,         &dev.starts_cnt,                   1 );
-
-        nvm_read16( NVM_ADDR_AFE_BIAS,              &dev.afe.bias,                      1 );
-        nvm_read16( NVM_ADDR_AFE_ADC_REG_MODE,      &dev.ad7799.reg.mode.u16,       1 );
-        nvm_read16( NVM_ADDR_AFE_ADC_REG_CONF,      &dev.ad7799.reg.conf.u16,       1 );
-
-        nvm_read16( NVM_ADDR_AFE_K_TEMP_DRIFT_HI,  &dev.sens.drift_k_temp.u16[ 1],     1 );
-        nvm_read16( NVM_ADDR_AFE_K_TEMP_DRIFT_LO,  &dev.sens.drift_k_temp.u16[ 0],     1 );
-        nvm_read16( NVM_ADDR_AFE_K_PRES_DRIFT_HI,  &dev.sens.drift_k_pres.u16[ 1],     1 );
-        nvm_read16( NVM_ADDR_AFE_K_PRES_DRIFT_LO,  &dev.sens.drift_k_pres.u16[ 0],     1 );
-
-        nvm_read16( NVM_ADDR_TRIM_P0_TIMESTMP_HI,  &dev.sens.trim.zero.timestmp.u16[ 1],     1 );
-        nvm_read16( NVM_ADDR_TRIM_P0_TIMESTMP_LO,  &dev.sens.trim.zero.timestmp.u16[ 0],     1 );
-        nvm_read16( NVM_ADDR_TRIM_P0_OXGN_PPM_HI,  &dev.sens.trim.zero.oxgn_ppm.u16[ 1],     1 );
-        nvm_read16( NVM_ADDR_TRIM_P0_OXGN_PPM_LO,  &dev.sens.trim.zero.oxgn_ppm.u16[ 0],     1 );
-        nvm_read16( NVM_ADDR_TRIM_P0_OXGN_RAW_HI,  &dev.sens.trim.zero.oxgn_raw.u16[ 1],     1 );
-        nvm_read16( NVM_ADDR_TRIM_P0_OXGN_RAW_LO,  &dev.sens.trim.zero.oxgn_raw.u16[ 0],     1 );
-
-        nvm_read16( NVM_ADDR_TRIM_P0_TEMP_DIGC_HI, &dev.sens.trim.zero.temp_digc.u16[ 1], 1 );
-        nvm_read16( NVM_ADDR_TRIM_P0_TEMP_DIGC_LO, &dev.sens.trim.zero.temp_digc.u16[ 0], 1 );
-        nvm_read16( NVM_ADDR_TRIM_P0_PRES_RAW_HI,  &dev.sens.trim.zero.pres_raw.u16[ 1],     1 );
-        nvm_read16( NVM_ADDR_TRIM_P0_PRES_RAW_LO,  &dev.sens.trim.zero.pres_raw.u16[ 0],     1 );
-
-        nvm_read16( NVM_ADDR_TRIM_P1_TIMESTMP_HI,  &dev.sens.trim.span.timestmp.u16[ 1],     1 );
-        nvm_read16( NVM_ADDR_TRIM_P1_TIMESTMP_LO,  &dev.sens.trim.span.timestmp.u16[ 0],     1 );
-        nvm_read16( NVM_ADDR_TRIM_P1_OXGN_PPM_HI,  &dev.sens.trim.span.oxgn_ppm.u16[ 1],     1 );
-        nvm_read16( NVM_ADDR_TRIM_P1_OXGN_PPM_LO,  &dev.sens.trim.span.oxgn_ppm.u16[ 0],     1 );
-        nvm_read16( NVM_ADDR_TRIM_P1_OXGN_RAW_HI,  &dev.sens.trim.span.oxgn_raw.u16[ 1],     1 );
-        nvm_read16( NVM_ADDR_TRIM_P1_OXGN_RAW_LO,  &dev.sens.trim.span.oxgn_raw.u16[ 0],     1 );
-        nvm_read16( NVM_ADDR_TRIM_P1_TEMP_DIGC_HI, &dev.sens.trim.span.temp_digc.u16[ 1], 1 );
-        nvm_read16( NVM_ADDR_TRIM_P1_TEMP_DIGC_LO, &dev.sens.trim.span.temp_digc.u16[ 0], 1 );
-        nvm_read16( NVM_ADDR_TRIM_P1_PRES_RAW_HI,  &dev.sens.trim.span.pres_raw.u16[ 1],     1 );
-        nvm_read16( NVM_ADDR_TRIM_P1_PRES_RAW_LO,  &dev.sens.trim.span.pres_raw.u16[ 0],     1 );
-}
-
-
-/*******************************************************************************
 * PUBLIC FUNCTIONS
 *******************************************************************************/
 /**
@@ -265,10 +173,7 @@ main( void )
         stm32_led_sts_init();
         stm32_led_sts_set( true );
 
-        nvm_init();
-        app_nvm_restore();
-        dev_sens_trim_restore( &dev.sens.trim );
-        //Filter_init( &filter );
+        dev_init( &dev );
 
 /*
         for( size_t i = 0; i < SMA_ORDER; i++ )
@@ -312,8 +217,6 @@ main( void )
         stm32_usart1_config_baudrate( CFG_MDBS_BAUDRATE );
         stm32_usart1_init();
         stm32_usart1_recv_dma( modbus_adu, MDBS_RTU_ADU_SIZEOF );
-
-        dev_init( &dev );
 
 
         while( true )

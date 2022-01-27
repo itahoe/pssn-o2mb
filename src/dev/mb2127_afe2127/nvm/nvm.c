@@ -34,7 +34,7 @@ nvm_init( void )
   * @retval None
   */
 void
-nvm_read16(                                     nvm_addr_t  addr,
+nvm_read16_(                                     nvm_addr_t  addr,
                                                 uint16_t *      data,
                                         const   size_t          len )
 {
@@ -51,16 +51,21 @@ nvm_read16(                                     nvm_addr_t  addr,
   * @retval None
   */
 void
-nvm_write16(                            nvm_addr_t      addr,
+nvm_write16_(                            nvm_addr_t      addr,
                                         uint16_t *      const   data,
                                 const   size_t          len )
 {
+    //printf( "addr: %d, len: %d\n", addr, len );
+
         HAL_FLASH_Unlock();
 
         for( size_t i = 0; i < len; i++ )
         {
                 stm32_nvm_write16( addr + i, *(data + i) );
+
+                //printf( "%04X ", *(data + i) );
         }
+        //printf( "\n" );
 
         HAL_FLASH_Lock();
 }

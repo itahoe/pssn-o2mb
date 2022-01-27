@@ -18,7 +18,7 @@ typedef struct  sma_s
 {
     sma_data_t          sum;
     //sma_data_t *        buf;
-    sma_data_t          buf[CONF_SMA_BUF_SIZEOF];
+    sma_data_t          buf[CONF_SENS_LPF_FCUT_MAX];
     size_t              buf_sizeof;
     size_t              idx;
     size_t              order;

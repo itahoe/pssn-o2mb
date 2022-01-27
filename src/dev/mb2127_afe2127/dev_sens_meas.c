@@ -41,22 +41,22 @@ dev_sens_meas_raw_to_ppm(                       dev_sens_t *        p,
                                                 int32_t             raw )
 {
         //const   sens_oxgn_t *   oxgn            = &( p->oxgn );
-        const   dev_sens_trim_t *   trim            = &( p->trim );
+        //const   dev_sens_trim_t *   trim            = &( p->trim );
 
         //float           k_temp  = 1.0;
         //float           k_temp  = sens_get_k_temp_digc( p->temp.digc.f32 );
 
-        float           kt_trim = sens_get_k_temp_digc( p->trim.span.temp_digc.f32 );
+        float           kt_trim = sens_get_k_temp_digc( p->span.temp_digc.f32 );
         float           kt_meas = sens_get_k_temp_digc( p->temp.digc.f32 );
         float           kt      = kt_trim / kt_meas;
         //float           kt      = 1.0f;
 
-        float           pres_trim = p->trim.span.pres_raw.u32;
+        float           pres_trim = p->span.pres_raw.u32;
         float           pres_meas = p->pres.raw.u32;
         float           kp      = pres_trim / pres_meas;
         //float           kp      = 1.0f;
 
-        float           ppm     = (raw + trim->offset) * trim->slope * kt * kp;
+        float           ppm     = (raw + p->offset) * p->slope * kt * kp;
 
 
         return(ppm);
@@ -69,17 +69,14 @@ dev_sens_meas_raw_to_ppm(                       dev_sens_t *        p,
   * @retval None
   */
 void
-dev_sens_trim_restore(                      dev_sens_trim_t *   p )
+dev_sens_trim_restore(                      dev_sens_t *   p )
 {
-        float   raw_zero        = p->zero.oxgn_raw.u32;
-        float   raw_span        = p->span.oxgn_raw.u32;
-        float   ppm_span        = p->span.oxgn_ppm.u32;
+        float   zero_raw        = p->zero.raw.i32;
+        float   span_raw        = p->span.raw.i32;
+        float   span_ppm        = p->span.ppm.i32;
 
-        p->offset       = 0.0 - raw_zero;
-        //p->offset       = 0.0 - (raw_zero * ktemp_zero);
-
-        p->slope        = ppm_span / (raw_span + p->offset);
-        //p->slope        = ppm_span / ((raw_span * ktemp_span) + p->offset);
+        p->offset       = 0.0f - zero_raw;
+        p->slope        = span_ppm / (span_raw + p->offset);
 }
 
 
@@ -99,7 +96,7 @@ dev_sens_meas_update(                           dev_sens_t *    p )
 
     for( size_t i = 0; i < p->lpf.order; i++ )
     {
-        if( i < CONF_LPF_ORDER_MAX )
+        if( i < CONF_SENS_LPF_ORDER_MAX )
         {
             raw = sma_filter( &p->meas.sma[ i], raw );
         }
